@@ -1,0 +1,2891 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Sri Vari – Shop Smart</title>
+<link rel="manifest" href="manifest.json"/>
+<meta name="theme-color" content="#c2410c"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="Sri Vari"/>
+<link rel="apple-touch-icon" href="https://i.ibb.co/35Dw6gPV/1776693085546.png"/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=DM+Serif+Display&display=swap" rel="stylesheet"/>
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.12.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.1/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.1/firebase-auth-compat.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --navy:#c2410c;--blue:#f97316;--amber:#f59e0b;
+  --green:#059669;--red:#ef4444;--gray:#f4f6fb;
+  --border:#e8edf5;--text:#1a1a2e;--muted:#6b7280;
+}
+html{overflow-x:hidden;width:100%}
+body{font-family:'DM Sans',sans-serif;background:var(--gray);color:var(--text);min-height:100vh;overflow-x:hidden;width:100%;position:relative}
+button{font-family:inherit;cursor:pointer}
+input,select{font-family:inherit}
+
+/* ── HEADER ── */
+#header{background:var(--navy);position:sticky;top:0;z-index:200;box-shadow:0 2px 12px rgba(0,0,0,.35);width:100%;max-width:100vw;overflow:hidden}
+.header-inner{max-width:1100px;margin:0 auto;display:flex;align-items:center;gap:10px;height:60px;padding:0 16px}
+.logo{font-family:'DM Serif Display',serif;font-size:24px;color:#fff;cursor:pointer;flex-shrink:0;letter-spacing:-.5px}
+.logo span{color:var(--amber)}
+
+/* Search bar: icon is OUTSIDE the white box, floats right as a button */
+.search-bar{flex:1;display:flex;align-items:center;gap:8px}
+.search-bar input{flex:1;border:2px solid rgba(255,255,255,.25);outline:none;padding:9px 16px;font-size:14px;color:var(--text);background:#fff;border-radius:10px;transition:.2s}
+.search-bar input:focus{border-color:var(--amber)}
+.search-icon-btn{background:rgba(255,255,255,.15);border:2px solid rgba(255,255,255,.25);color:#fff;border-radius:10px;width:40px;height:40px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;transition:.2s}
+.search-icon-btn:hover{background:var(--amber);border-color:var(--amber);color:var(--navy)}
+
+.hdr-btn{background:none;border:none;color:#fff;font-size:22px;padding:6px;position:relative;transition:.2s}
+.hdr-btn:hover{transform:scale(1.1)}
+.cart-badge{position:absolute;top:0;right:0;background:var(--red);color:#fff;border-radius:999px;min-width:17px;height:17px;font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;padding:0 4px}
+.subnav{background:#9a3412}
+.subnav-inner{max-width:1100px;margin:0 auto;display:flex;overflow-x:auto;padding:0 16px;scrollbar-width:none}
+.subnav-inner::-webkit-scrollbar{display:none}
+.subnav-btn{background:none;border:none;color:#ffedd5;padding:10px 14px;font-size:13px;font-weight:500;white-space:nowrap;border-bottom:2px solid transparent;transition:.2s}
+.subnav-btn:hover,.subnav-btn.active{color:var(--amber);border-bottom-color:var(--amber);font-weight:700}
+
+/* ── PAGES ── */
+.page{max-width:1100px;margin:0 auto;padding:20px 16px 100px}
+.page-hidden{display:none!important}
+
+/* ── HERO ── */
+.trust-bar{display:flex;gap:12px;flex-wrap:wrap;margin-top:16px}
+.trust-item{display:flex;align-items:center;gap:6px;font-size:12px;background:rgba(255,255,255,.12);border-radius:8px;padding:6px 12px}
+
+/* ── SECTION TITLE ── */
+.sec-title{font-size:17px;font-weight:800;color:var(--navy);border-left:4px solid var(--amber);padding-left:10px;margin-bottom:14px}
+
+/* ── PRODUCT GRID ── */
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+
+/* ── PRODUCT CARD ── */
+.card{background:#fff;border-radius:12px;padding:14px;border:1px solid var(--border);position:relative;transition:all .2s;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.07)}
+.card:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,.12)}
+.card-emoji{font-size:52px;text-align:center;display:block;margin-bottom:8px}
+.card-name{font-weight:700;font-size:14px;margin-bottom:3px;color:var(--text)}
+.card-brand{font-size:11px;color:var(--muted);margin-bottom:5px}
+.stars{color:#f59e0b;font-size:12px;letter-spacing:1px}
+.card-price{font-weight:800;font-size:16px;color:var(--navy)}
+.card-mrp{font-size:11px;color:#9ca3af;text-decoration:line-through;margin-left:5px}
+.card-disc{font-size:11px;color:var(--green);font-weight:700;margin-left:4px}
+.badge{position:absolute;top:10px;left:10px;font-size:9px;font-weight:800;padding:2px 7px;border-radius:4px;letter-spacing:.3px;color:#fff}
+.badge-value{background:var(--blue)}
+.badge-top{background:#7c3aed}
+.wish-btn{position:absolute;top:8px;right:8px;background:none;border:none;font-size:18px;color:#d1d5db;padding:4px;transition:.2s}
+.wish-btn.active,.wish-btn:hover{color:var(--red)}
+.add-btn{width:100%;background:var(--navy);color:#fff;border:none;border-radius:8px;padding:8px 0;font-weight:700;font-size:13px;margin-top:10px;transition:.2s}
+.add-btn:hover{background:#0f2450}
+.qty-ctrl{display:flex;align-items:center;justify-content:center;gap:4px;margin-top:10px}
+.qty-btn{background:var(--border);border:none;width:32px;height:32px;border-radius:7px;font-weight:800;font-size:17px;transition:.2s}
+.qty-btn:hover{background:#d1d5db}
+.qty-num{width:36px;text-align:center;font-weight:800;font-size:14px}
+
+/* ── LIST CARD ── */
+.list-card{background:#fff;border-radius:12px;padding:14px;border:1px solid var(--border);display:flex;align-items:center;gap:14px;cursor:pointer;transition:.2s}
+.list-card:hover{box-shadow:0 4px 16px rgba(0,0,0,.1)}
+
+/* ── DELIVERY BADGE ── */
+.del-badge{display:inline-flex;align-items:center;gap:5px;border-radius:6px;padding:3px 9px;font-size:11px;font-weight:700}
+.del-today{background:#ecfdf5;color:var(--green);border:1px solid #6ee7b7}
+.del-tmrw{background:#fff7ed;color:var(--blue);border:1px solid #fdba74}
+
+/* ── SIDEBAR ── */
+.sidebar{background:#fff;border-radius:12px;padding:16px;border:1px solid var(--border);width:200px;flex-shrink:0;position:sticky;top:110px;align-self:flex-start}
+.filter-title{font-weight:800;font-size:11px;text-transform:uppercase;letter-spacing:.6px;color:var(--navy);margin-bottom:8px}
+.filter-opt{display:flex;align-items:center;gap:8px;padding:6px 0;font-size:13px;cursor:pointer;color:#374151;transition:.2s;user-select:none}
+.filter-opt:hover{color:var(--blue)}
+.filter-opt.active{color:var(--blue);font-weight:700}
+.divider{border:none;border-top:1px solid #f0f0f0;margin:12px 0}
+
+/* ── BUTTONS ── */
+.btn{display:block;width:100%;border:none;border-radius:10px;padding:12px 24px;font-weight:700;font-size:14px;margin-bottom:10px;transition:.2s;text-align:center}
+.btn-primary{background:var(--navy);color:#fff}
+.btn-primary:hover{background:#0f2450}
+.btn-secondary{background:var(--amber);color:var(--navy)}
+.btn-secondary:hover{background:#e08d00}
+.btn-default{background:var(--border);color:#374151}
+.btn-default:hover{background:#d1d5db}
+.btn-outline{background:#fff;color:#374151;border:1.5px solid var(--border)}
+
+/* ── SUMMARY BOX ── */
+.summary-box{background:#fff;border-radius:12px;padding:18px;border:1px solid var(--border);box-shadow:0 1px 4px rgba(0,0,0,.07)}
+.sum-row{display:flex;justify-content:space-between;margin-bottom:8px;font-size:14px}
+.progress-wrap{background:var(--border);border-radius:999px;height:8px;margin-bottom:6px;overflow:hidden}
+.progress-fill{height:100%;border-radius:999px;background:var(--blue);transition:width .5s}
+
+/* ── INPUT ── */
+.inp{width:100%;border:1.5px solid var(--border);border-radius:8px;padding:10px 14px;font-size:14px;outline:none;margin-bottom:10px;transition:.2s}
+.inp:focus{border-color:var(--blue)}
+
+/* ── CART ── */
+.cart-row{display:flex;align-items:center;gap:12px;background:#fff;border-radius:12px;padding:14px;margin-bottom:10px;border:1px solid var(--border)}
+
+/* ── STEP ── */
+.step-bar{display:flex;align-items:center;margin-bottom:24px}
+.step-circle{width:28px;height:28px;border-radius:999px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;flex-shrink:0}
+.step-line{flex:1;height:2px;margin:0 8px}
+.step-label{font-size:12px;margin-left:6px;white-space:nowrap}
+
+/* ── CATEGORY CHIPS ── */
+.cat-chips{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:28px}
+.cat-chip{background:#fff;border:2px solid var(--border);border-radius:12px;padding:14px 20px;cursor:pointer;font-weight:700;font-size:14px;color:var(--navy);display:flex;flex-direction:column;align-items:center;gap:4px;flex:1 1 90px;transition:.2s;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.cat-chip:hover{border-color:var(--blue);background:#fff7ed}
+.cat-chip .cat-icon{font-size:28px}
+
+/* ── TOAST ── */
+#toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--navy);color:#fff;padding:10px 24px;border-radius:999px;font-weight:700;font-size:14px;z-index:999;opacity:0;transition:all .3s;pointer-events:none;white-space:nowrap;box-shadow:0 4px 20px rgba(0,0,0,.3)}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ── BOTTOM NAV ── */
+#bottom-nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid var(--border);display:flex;z-index:150;box-shadow:0 -2px 12px rgba(0,0,0,.08);padding-bottom:env(safe-area-inset-bottom)}
+.nav-item{flex:1;background:none;border:none;padding:10px 0 8px;display:flex;flex-direction:column;align-items:center;gap:2px;color:#9ca3af;font-size:10px;font-weight:600;transition:.2s;position:relative}
+.nav-item.active{color:var(--navy)}
+.nav-item .nav-icon{font-size:20px}
+.nav-item .nav-badge{position:absolute;top:6px;right:50%;margin-right:-22px;background:var(--red);color:#fff;border-radius:999px;min-width:15px;height:15px;font-size:9px;font-weight:800;display:flex;align-items:center;justify-content:center;padding:0 3px}
+
+/* ── TRUST SECTION ── */
+.trust-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px}
+.trust-card{background:rgba(255,255,255,.1);border-radius:10px;padding:14px}
+
+/* ── CONFIRM ── */
+.confirm-box{max-width:540px;margin:0 auto;text-align:center}
+
+/* ── ACCOUNT TABS ── */
+.acc-tabs{display:flex;background:#fff;border-radius:10px;border:1px solid var(--border);overflow:hidden;margin-bottom:20px}
+.acc-tab{flex:1;padding:12px 4px;border:none;background:none;font-size:12px;font-weight:600;color:#374151;cursor:pointer;transition:.2s}
+.acc-tab.active{background:var(--navy);color:#fff}
+
+/* ── PRODUCT PAGE ── */
+.prod-layout{display:flex;gap:24px;flex-wrap:wrap}
+.prod-img-box{background:#fff;border-radius:16px;padding:40px;text-align:center;font-size:120px;flex:0 0 260px;border:1px solid var(--border);box-shadow:0 1px 4px rgba(0,0,0,.07);position:relative;align-self:flex-start}
+.spec-table{width:100%;font-size:13px;border-collapse:collapse}
+.spec-table td{padding:8px 0;border-bottom:1px solid #f0f0f0}
+.spec-table td:first-child{color:var(--muted);width:40%}
+.review-card{background:#f8fafc;border-radius:10px;padding:12px;margin-bottom:8px}
+
+/* ── TIMER BANNER ── */
+.timer-banner{background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:12px 16px;margin-bottom:20px;display:flex;align-items:center;gap:10px}
+
+/* ── FREE DELIVERY BANNER ── */
+.free-del-banner{background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;padding:9px 14px;margin-bottom:14px;font-size:13px;color:#9a3412}
+
+/* ── ANIMATIONS ── */
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+.page:not(.page-hidden){animation:fadeIn .25s ease}
+
+/* ── RESPONSIVE ── */
+@media(max-width:600px){
+  .hero{padding:24px 20px}
+  .hero h1{font-size:22px}
+  .sidebar{width:100%!important;position:static!important}
+  .prod-img-box{flex:none!important;width:100%}
+  .listing-layout{flex-direction:column!important}
+}
+
+/* ── AI CHATBOT ── */
+@keyframes botPulse{0%,100%{box-shadow:0 0 0 0 rgba(249,115,22,.4)}70%{box-shadow:0 0 0 10px rgba(249,115,22,0)}}
+@keyframes floatIn{from{opacity:0;transform:translateY(14px) scale(.95)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+@keyframes dotBounce{0%,80%,100%{transform:scale(0)}40%{transform:scale(1)}}
+@keyframes cardEntrance{from{opacity:0;transform:perspective(600px) rotateX(-12deg) translateY(20px)}to{opacity:1;transform:perspective(600px) rotateX(0deg) translateY(0)}}
+@keyframes glowPulse{0%,100%{opacity:.6}50%{opacity:1}}
+
+.ai-chat-wrapper{
+  perspective:1000px;
+  animation:cardEntrance .5s cubic-bezier(.22,1,.36,1) forwards;
+}
+.ai-chat-card{
+  background:linear-gradient(145deg,#431407 0%,#c2410c 50%,#c2410c 100%);
+  border-radius:20px;
+  overflow:hidden;
+  box-shadow:0 24px 60px rgba(67,20,7,.45),0 0 0 1px rgba(255,255,255,.08),inset 0 1px 0 rgba(255,255,255,.12);
+  transform-style:preserve-3d;
+  transition:transform .3s ease,box-shadow .3s ease;
+  position:relative;
+}
+.ai-chat-card::before{
+  content:'';
+  position:absolute;
+  inset:0;
+  background:radial-gradient(ellipse at 30% -20%,rgba(251,146,60,.18) 0%,transparent 60%),
+             radial-gradient(ellipse at 80% 120%,rgba(245,158,11,.1) 0%,transparent 50%);
+  pointer-events:none;
+  z-index:0;
+}
+.ai-chat-header{
+  padding:16px 18px 14px;
+  display:flex;
+  align-items:center;
+  gap:12px;
+  position:relative;
+  z-index:1;
+  border-bottom:1px solid rgba(255,255,255,.08);
+}
+.ai-avatar-ring{
+  position:relative;
+  width:44px;height:44px;flex-shrink:0;
+}
+.ai-avatar-ring::before{
+  content:'';
+  position:absolute;
+  inset:-3px;
+  border-radius:50%;
+  background:conic-gradient(#f97316,#f59e0b,#f97316);
+  animation:spin 3s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.ai-avatar-inner{
+  position:relative;z-index:1;
+  width:44px;height:44px;
+  border-radius:50%;
+  background:linear-gradient(135deg,#ea580c,#c2410c);
+  display:flex;align-items:center;justify-content:center;
+  font-size:20px;
+  border:2px solid #431407;
+}
+.ai-status-dot{
+  width:9px;height:9px;
+  border-radius:50%;
+  background:#22c55e;
+  position:absolute;bottom:1px;right:1px;
+  border:2px solid #431407;
+  animation:botPulse 2s infinite;
+}
+.ai-header-text{color:#fff}
+.ai-header-text .name{font-weight:800;font-size:15px;letter-spacing:-.2px}
+.ai-header-text .status{font-size:11px;color:#fdba74;display:flex;align-items:center;gap:5px}
+
+.ai-messages{
+  height:320px;
+  overflow-y:auto;
+  padding:16px;
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+  position:relative;z-index:1;
+  scrollbar-width:thin;
+  scrollbar-color:rgba(255,255,255,.15) transparent;
+}
+.ai-messages::-webkit-scrollbar{width:4px}
+.ai-messages::-webkit-scrollbar-thumb{background:rgba(255,255,255,.15);border-radius:4px}
+
+.msg-bubble{
+  max-width:82%;
+  padding:10px 14px;
+  border-radius:16px;
+  font-size:13.5px;
+  line-height:1.55;
+  animation:floatIn .25s ease forwards;
+  position:relative;
+}
+.msg-bot{
+  background:rgba(255,255,255,.1);
+  color:#e2e8f0;
+  align-self:flex-start;
+  border-bottom-left-radius:4px;
+  backdrop-filter:blur(8px);
+  border:1px solid rgba(255,255,255,.08);
+}
+.msg-user{
+  background:linear-gradient(135deg,#f97316,#ea580c);
+  color:#fff;
+  align-self:flex-end;
+  border-bottom-right-radius:4px;
+  box-shadow:0 4px 12px rgba(249,115,22,.35);
+}
+.msg-time{font-size:10px;opacity:.5;margin-top:4px;display:block}
+
+.typing-indicator{
+  display:flex;align-items:center;gap:5px;
+  padding:10px 14px;
+  background:rgba(255,255,255,.08);
+  border-radius:16px;border-bottom-left-radius:4px;
+  align-self:flex-start;
+  backdrop-filter:blur(8px);
+  border:1px solid rgba(255,255,255,.08);
+}
+.typing-indicator span{
+  width:7px;height:7px;
+  border-radius:50%;
+  background:#fdba74;
+  display:inline-block;
+  animation:dotBounce 1.2s infinite ease-in-out;
+}
+.typing-indicator span:nth-child(1){animation-delay:0s}
+.typing-indicator span:nth-child(2){animation-delay:.16s}
+.typing-indicator span:nth-child(3){animation-delay:.32s}
+
+.ai-input-bar{
+  display:flex;
+  gap:8px;
+  padding:12px 14px;
+  background:rgba(0,0,0,.25);
+  position:relative;z-index:1;
+  border-top:1px solid rgba(255,255,255,.07);
+}
+.ai-input{
+  flex:1;
+  background:rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:12px;
+  padding:10px 14px;
+  font-size:13px;
+  color:#fff;
+  outline:none;
+  font-family:inherit;
+  transition:border-color .2s,background .2s;
+}
+.ai-input::placeholder{color:rgba(255,255,255,.35)}
+.ai-input:focus{border-color:rgba(249,115,22,.6);background:rgba(255,255,255,.12)}
+.ai-send-btn{
+  width:42px;height:42px;flex-shrink:0;
+  background:linear-gradient(135deg,#f97316,#ea580c);
+  border:none;border-radius:12px;
+  color:#fff;font-size:17px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:transform .15s,box-shadow .15s;
+  box-shadow:0 4px 14px rgba(249,115,22,.4);
+}
+.ai-send-btn:hover{transform:scale(1.08);box-shadow:0 6px 20px rgba(249,115,22,.5)}
+.ai-send-btn:active{transform:scale(.95)}
+.ai-send-btn:disabled{opacity:.4;cursor:default;transform:none}
+
+.ai-quick-chips{
+  display:flex;gap:6px;flex-wrap:wrap;
+  padding:0 14px 10px;
+  position:relative;z-index:1;
+}
+.ai-chip{
+  background:rgba(255,255,255,.07);
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:20px;
+  padding:5px 12px;
+  font-size:11.5px;
+  color:#ffedd5;
+  cursor:pointer;
+  font-family:inherit;
+  transition:all .2s;
+  white-space:nowrap;
+}
+.ai-chip:hover{background:rgba(249,115,22,.25);border-color:#f97316;color:#fff}
+
+.ai-trust-strip{
+  background:rgba(5,150,105,.15);
+  border-top:1px solid rgba(5,150,105,.2);
+  padding:10px 16px;
+  font-size:12px;
+  color:#6ee7b7;
+  text-align:center;
+  position:relative;z-index:1;
+}
+
+/* ── DELIVERY PARTNER SYSTEM ── */
+:root {
+  --dp-orange: #f97316;
+  --dp-dark: #431407;
+  --dp-card: #1e293b;
+  --dp-border: rgba(255,255,255,.1);
+  --dp-green: #22c55e;
+  --dp-red: #ef4444;
+  --dp-amber: #fbbf24;
+}
+
+.dp-login-trigger{position:absolute;top:16px;right:16px;background:linear-gradient(135deg,#c2410c,#f97316);color:#fff;border:none;border-radius:10px;padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px;box-shadow:0 4px 14px rgba(194,65,12,.3);transition:all .2s;white-space:nowrap}
+.dp-login-trigger:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(194,65,12,.4)}
+#dp-login-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:1100;align-items:center;justify-content:center}
+.dp-login-card{background:#fff;border-radius:20px;width:360px;max-width:94vw;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.2)}
+.dp-login-header{background:linear-gradient(135deg,#c2410c,#f97316);padding:28px 28px 32px;text-align:center;position:relative}
+.dp-login-header::after{content:'';position:absolute;bottom:-1px;left:0;right:0;height:24px;background:#fff;border-radius:24px 24px 0 0}
+.dp-login-body{padding:20px 28px 28px}
+.dp-inp{width:100%;background:#f4f6fb;border:1.5px solid #e8edf5;border-radius:10px;padding:12px 14px;font-size:14px;color:#1a1a2e;outline:none;font-family:inherit;margin-bottom:12px;transition:border-color .2s}
+.dp-inp:focus{border-color:#c2410c;background:#fff7ed}
+.dp-inp::placeholder{color:#9ca3af}
+.dp-btn-main{width:100%;background:linear-gradient(135deg,#c2410c,#f97316);color:#fff;border:none;border-radius:10px;padding:13px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:4px;transition:all .2s;box-shadow:0 4px 16px rgba(194,65,12,.25)}
+.dp-btn-main:hover{transform:translateY(-1px);box-shadow:0 8px 24px rgba(194,65,12,.35)}
+.dp-btn-ghost{width:100%;background:none;color:#6b7280;border:1.5px solid #e8edf5;border-radius:10px;padding:10px;font-size:13px;cursor:pointer;font-family:inherit;margin-top:8px;transition:all .2s}
+.dp-btn-ghost:hover{background:#f4f6fb;color:#374151}
+#dp-dashboard{display:none;position:fixed;inset:0;background:#f4f6fb;z-index:2000;overflow-y:auto;font-family:'DM Sans',sans-serif}
+.dp-topbar{background:#c2410c;padding:0 20px;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:10;box-shadow:0 2px 12px rgba(0,0,0,.25)}
+.dp-logo{font-family:'DM Serif Display',serif;font-size:22px;color:#fff}
+.dp-logo span{color:#f59e0b}
+.dp-partner-badge{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;border-radius:8px;padding:4px 12px;font-size:12px;font-weight:700}
+.dp-content{padding:20px 20px 100px;max-width:680px;margin:0 auto}
+.dp-toggle-card{background:#fff;border:1px solid #e8edf5;border-radius:16px;padding:18px 22px;display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.dp-status-label{font-size:12px;color:#9ca3af;margin-bottom:3px}
+.dp-status-text{font-size:18px;font-weight:800}
+.dp-status-text.online{color:#059669}
+.dp-status-text.offline{color:#9ca3af}
+.dp-toggle-input{display:none}
+.dp-toggle-label{display:block;width:60px;height:32px;background:#d1d5db;border-radius:999px;cursor:pointer;transition:background .3s;position:relative}
+.dp-toggle-label::after{content:'';position:absolute;width:24px;height:24px;background:#fff;border-radius:50%;top:4px;left:4px;transition:transform .3s cubic-bezier(.34,1.56,.64,1);box-shadow:0 2px 6px rgba(0,0,0,.15)}
+.dp-toggle-input:checked+.dp-toggle-label{background:#059669}
+.dp-toggle-input:checked+.dp-toggle-label::after{transform:translateX(28px)}
+.dp-stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:18px}
+.dp-stat-card{background:#fff;border:1px solid #e8edf5;border-radius:14px;padding:14px;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,.05)}
+.dp-stat-icon{font-size:20px;margin-bottom:5px}
+.dp-stat-val{font-size:20px;font-weight:800;color:#c2410c;margin-bottom:1px}
+.dp-stat-lbl{font-size:10px;color:#9ca3af;text-transform:uppercase;letter-spacing:.4px}
+.dp-tabs{display:flex;background:#fff;border-radius:12px;border:1px solid #e8edf5;overflow:hidden;margin-bottom:18px}
+.dp-tab{flex:1;padding:11px 4px;border:none;background:none;font-size:10px;font-weight:600;color:#9ca3af;cursor:pointer;transition:all .2s;font-family:inherit;display:flex;flex-direction:column;align-items:center;gap:3px}
+.dp-tab-icon{font-size:17px}
+.dp-tab.active{background:linear-gradient(135deg,#c2410c,#f97316);color:#fff}
+.dp-order-card{background:#fff;border:1px solid #e8edf5;border-radius:14px;padding:16px;margin-bottom:10px;box-shadow:0 1px 6px rgba(0,0,0,.06)}
+.dp-order-card.urgent{border-left:4px solid #f97316}
+.dp-order-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px}
+.dp-order-id{font-size:13px;font-weight:800;color:#c2410c}
+.dp-order-time{font-size:11px;color:#9ca3af;margin-top:2px}
+.dp-order-status{font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px}
+.status-assigned{background:#fff7ed;color:#f97316;border:1px solid #fed7aa}
+.status-picked{background:#fffbeb;color:#d97706;border:1px solid #fde68a}
+.status-delivered{background:#ecfdf5;color:#059669;border:1px solid #6ee7b7}
+.status-pending{background:#f3f4f6;color:#9ca3af;border:1px solid #e5e7eb}
+.dp-order-addr{font-size:13px;color:#374151;margin-bottom:10px;line-height:1.5}
+.dp-order-footer{display:flex;justify-content:space-between;align-items:center}
+.dp-order-amount{font-size:15px;font-weight:800;color:#c2410c}
+.dp-order-items{font-size:11px;color:#9ca3af;margin-top:2px}
+.dp-action-btns{display:flex;gap:6px}
+.dp-btn-sm{border:none;border-radius:9px;padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .2s}
+.dp-btn-accept{background:#ecfdf5;color:#059669;border:1px solid #6ee7b7}
+.dp-btn-pickup{background:linear-gradient(135deg,#c2410c,#f97316);color:#fff}
+.dp-btn-deliver{background:#ecfdf5;color:#059669;border:1px solid #6ee7b7}
+.dp-btn-sm:hover{transform:scale(1.04)}
+.dp-earn-card{background:linear-gradient(135deg,#c2410c,#f97316);border-radius:18px;padding:22px;margin-bottom:14px;text-align:center}
+.dp-earn-amount{font-size:40px;font-weight:800;color:#fff}
+.dp-earn-label{font-size:13px;color:rgba(255,255,255,.7);margin-top:4px}
+.dp-earn-row{background:#fff;border:1px solid #e8edf5;border-radius:10px;padding:13px 16px;display:flex;justify-content:space-between;align-items:center;margin-bottom:7px}
+.dp-earn-desc{font-size:13px;color:#374151}
+.dp-earn-val{font-size:14px;font-weight:700;color:#059669}
+.dp-profile-header{background:linear-gradient(135deg,#c2410c,#f97316);border-radius:18px;padding:24px;text-align:center;margin-bottom:14px}
+.dp-avatar{width:68px;height:68px;background:rgba(255,255,255,.2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:30px;margin:0 auto 10px;border:3px solid rgba(255,255,255,.35)}
+.dp-profile-name{font-size:19px;font-weight:800;color:#fff;margin-bottom:3px}
+.dp-profile-id{font-size:13px;color:rgba(255,255,255,.8);font-weight:700;margin-bottom:8px}
+.dp-profile-row{background:#fff;border:1px solid #e8edf5;border-radius:10px;padding:13px 16px;display:flex;justify-content:space-between;align-items:center;margin-bottom:7px}
+.dp-profile-key{font-size:13px;color:#6b7280}
+.dp-profile-val{font-size:13px;font-weight:700;color:#1a1a2e}
+.dp-bottom-nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #e8edf5;display:none;z-index:2010;box-shadow:0 -2px 10px rgba(0,0,0,.08)}
+.adm-dp-card{background:#f8fafc;border:1px solid #e8edf5;border-radius:12px;padding:14px 16px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.adm-dp-id{font-size:14px;font-weight:800;color:#c2410c}
+.adm-dp-meta{font-size:11px;color:#9ca3af;margin-top:2px}
+.adm-status-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.adm-dp-btns{display:flex;gap:7px;flex-wrap:wrap}
+#assign-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:2100;align-items:center;justify-content:center}
+.assign-card{background:#fff;border-radius:18px;padding:26px 22px;width:360px;max-width:92vw;border:1px solid #e8edf5;box-shadow:0 20px 60px rgba(0,0,0,.15)}
+@keyframes dpSlide{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+</style>
+</head>
+<body>
+
+<!-- ── HEADER ── -->
+<div id="header">
+  <div class="header-inner">
+    <div class="logo" onclick="nav('home')">Sri <span>Vari</span></div>
+    <div class="search-bar">
+      <input id="search-input" type="text" placeholder="Search products..." onkeydown="if(event.key==='Enter')doSearch()"/>
+      <button class="search-icon-btn" onclick="doSearch()">🔍</button>
+    </div>
+    <button class="hdr-btn" onclick="nav('cart')" style="position:relative">🛒<span id="hdr-cart-badge" class="cart-badge" style="display:none">0</span></button>
+    <button class="hdr-btn" onclick="nav('account')">👤</button>
+  </div>
+  <div class="subnav">
+    <div class="subnav-inner" id="subnav">
+      <button class="subnav-btn active" id="snav-all" onclick="nav('listing','All')">All</button>
+      <button class="subnav-btn" id="snav-Grocery" onclick="nav('listing','Grocery')">Grocery</button>
+      <button class="subnav-btn" id="snav-Dairy" onclick="nav('listing','Dairy')">Dairy</button>
+      <button class="subnav-btn" id="snav-Beverages" onclick="nav('listing','Beverages')">Beverages</button>
+      <button class="subnav-btn" id="snav-Home" onclick="nav('listing','Home')">Home</button>
+      <button class="subnav-btn" id="snav-Stationery" onclick="nav('listing','Stationery')">Stationery</button>
+      <button class="subnav-btn" onclick="nav('listing','All')">🏷️ Deals</button>
+      <button class="subnav-btn" onclick="nav('account')">📦 Orders</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── TOAST ── -->
+<div id="toast"></div>
+
+<!-- ── GMAIL LOGIN MODAL ── -->
+<div id="login-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.65);z-index:1000;align-items:center;justify-content:center">
+  <div style="background:#fff;border-radius:20px;padding:36px 24px;width:340px;max-width:92vw;box-shadow:0 24px 60px rgba(0,0,0,.3);text-align:center;position:relative">
+    <button class="dp-login-trigger" onclick="openDPLogin()">🚚 Delivery Login</button>
+    <div style="font-family:'DM Serif Display',serif;font-size:28px;color:#c2410c;margin-bottom:4px">Sri <span style="color:#f59e0b">Vari</span></div>
+    <div style="font-size:13px;color:#6b7280;margin-bottom:24px">Shop Smart · Fast Delivery</div>
+    <div style="font-size:40px;margin-bottom:12px">👋</div>
+    <div style="font-weight:800;font-size:18px;color:#c2410c;margin-bottom:6px">Welcome to Sri Vari!</div>
+    <div style="font-size:13px;color:#6b7280;margin-bottom:24px">Sign in to start shopping</div>
+    <div id="step-referral" style="display:none;margin-bottom:16px">
+      <div style="font-size:28px;margin-bottom:8px">🎁</div>
+      <div style="font-weight:700;font-size:15px;color:#c2410c;margin-bottom:4px">Have a Referral Code?</div>
+      <div style="font-size:12px;color:#6b7280;margin-bottom:12px">Get 1 extra free delivery!</div>
+      <input id="referral-input" class="inp" type="text" placeholder="Enter code (optional)" style="text-align:center;text-transform:uppercase;font-weight:700;letter-spacing:2px;margin-bottom:8px"/>
+      <div id="referral-msg" style="display:none;font-size:12px;font-weight:700;margin-bottom:8px"></div>
+      <button class="btn btn-primary" onclick="applyReferralAndFinish()" style="margin-bottom:6px">Continue →</button>
+      <button onclick="applyReferralAndFinish()" style="background:none;border:none;color:var(--muted);font-size:13px;cursor:pointer;font-family:inherit">Skip</button>
+    </div>
+    <div id="step-google">
+      <button onclick="signInWithGoogle()" style="display:flex;align-items:center;justify-content:center;gap:12px;width:100%;background:#fff;border:2px solid #e8edf5;border-radius:12px;padding:14px 20px;font-size:15px;font-weight:700;color:#374151;cursor:pointer;font-family:inherit;box-shadow:0 2px 8px rgba(0,0,0,.08)">
+        <img src="https://www.google.com/favicon.ico" style="width:20px;height:20px"/>
+        Continue with Google
+      </button>
+      <div id="login-error" style="display:none;color:#ef4444;font-size:12px;font-weight:700;margin-top:10px"></div>
+    </div>
+    <div style="font-size:11px;color:#9ca3af;margin-top:16px">✅ Sign in once — remembered on this device</div>
+  </div>
+</div>
+
+<!-- ── HOME PAGE ── -->
+<div id="page-home" class="page">
+  <input id="hero-search" type="text" style="display:none"/>
+  <div class="sec-title" style="margin-bottom:14px">🛍️ All Products</div>
+  <div class="grid" id="home-all-products"></div>
+  <div style="margin-bottom:28px"></div>
+</div>
+
+<!-- ── LISTING PAGE ── -->
+<div id="page-listing" class="page page-hidden">
+  <div style="display:flex;gap:8px;align-items:center;margin-bottom:16px;flex-wrap:wrap">
+    <h2 id="listing-title" style="margin:0;font-size:18px;font-weight:800;color:var(--navy);flex:1">All Products</h2>
+    <select id="sort-select" onchange="renderListing()" style="border:1.5px solid var(--border);border-radius:8px;padding:7px 12px;font-size:13px;outline:none;font-family:inherit">
+      <option value="popularity">Sort: Popularity</option>
+      <option value="rating">Sort: Rating</option>
+      <option value="price-asc">Price: Low to High</option>
+      <option value="price-desc">Price: High to Low</option>
+    </select>
+    <button id="view-grid" style="display:none"></button>
+    <button id="view-list" style="display:none"></button>
+  </div>
+  <div style="width:100%">
+      <div class="free-del-banner">🚛 Free delivery on orders above ₹300</div>
+      <div id="listing-grid"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── PRODUCT PAGE ── -->
+<div id="page-product" class="page page-hidden">
+  <button onclick="nav('listing')" style="background:none;border:none;color:var(--blue);font-weight:700;margin-bottom:12px;font-size:14px;font-family:inherit">← Back</button>
+  <div class="prod-layout" id="prod-content"></div>
+  <div id="related-section" style="margin-top:32px"></div>
+</div>
+
+<!-- ── CART PAGE ── -->
+<div id="page-cart" class="page page-hidden">
+  <h2 style="font-size:20px;font-weight:800;color:var(--navy);margin-bottom:16px">🛒 Your Cart</h2>
+  <div id="cart-content"></div>
+</div>
+
+<!-- ── CHECKOUT PAGE ── -->
+<div id="page-checkout" class="page page-hidden">
+  <h2 style="font-size:20px;font-weight:800;color:var(--navy);margin-bottom:4px">Checkout</h2>
+  <div id="checkout-content"></div>
+</div>
+
+<!-- ── CONFIRM PAGE ── -->
+<div id="page-confirm" class="page page-hidden">
+  <div class="confirm-box">
+    <div style="font-size:72px;margin-bottom:16px">🎉</div>
+    <h2 style="font-size:24px;font-weight:800;color:var(--green);margin-bottom:8px">Order Placed!</h2>
+    <div id="confirm-content"></div>
+  </div>
+</div>
+
+<!-- ── ACCOUNT PAGE ── -->
+<div id="page-account" class="page page-hidden">
+  <div style="background:var(--navy);border-radius:14px;padding:20px 24px;color:#fff;margin-bottom:12px">
+    <div style="display:flex;align-items:center;gap:16px;margin-bottom:14px">
+      <div style="width:56px;height:56px;border-radius:999px;background:var(--amber);display:flex;align-items:center;justify-content:center;font-size:24px;cursor:pointer;flex-shrink:0" id="admin-avatar" onclick="handleAvatarTap()">👤</div>
+      <div style="flex:1">
+        <div style="font-weight:800;font-size:18px">My Account</div>
+        <div id="acc-phone-display" style="opacity:.8;font-size:13px">Sri Vari Member</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <div style="background:rgba(255,255,255,.12);border-radius:10px;padding:10px 14px;flex:1;min-width:120px">
+        <div style="font-size:11px;opacity:.7;margin-bottom:2px">🚚 Free Deliveries Left</div>
+        <div id="acc-free-del" style="font-weight:800;font-size:20px">3</div>
+      </div>
+      <div style="background:rgba(255,255,255,.12);border-radius:10px;padding:10px 14px;flex:1;min-width:120px;cursor:pointer" onclick="copyReferralCode()">
+        <div style="font-size:11px;opacity:.7;margin-bottom:2px">🎁 Your Referral Code</div>
+        <div id="acc-referral-code" style="font-weight:800;font-size:16px;letter-spacing:2px">------</div>
+        <div style="font-size:10px;opacity:.6;margin-top:2px">Tap to copy</div>
+      </div>
+    </div>
+  </div>
+  <div class="acc-tabs">
+    <button class="acc-tab active" onclick="setAccTab('orders',this)">📦 Orders</button>
+    <button class="acc-tab" onclick="setAccTab('wishlist',this)">♥ Wishlist</button>
+    <button class="acc-tab" onclick="setAccTab('addresses',this)">📍 Addresses</button>
+    <button class="acc-tab" onclick="setAccTab('support',this)">💬 Support</button>
+  </div>
+  <div id="acc-content"></div>
+</div>
+
+<!-- ── ADMIN PAGE ── -->
+<div id="page-admin" class="page page-hidden">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+    <h2 style="font-size:20px;font-weight:800;color:var(--navy)">🛠️ Admin Panel</h2>
+    <button onclick="nav('home')" style="background:var(--border);border:none;border-radius:8px;padding:8px 14px;font-weight:700;font-size:13px;font-family:inherit;cursor:pointer">← Back</button>
+  </div>
+  <!-- Add Product Form -->
+  <div class="summary-box" style="margin-bottom:20px">
+    <div style="font-weight:800;font-size:15px;color:var(--navy);margin-bottom:14px">➕ Add / Update Product</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <input class="inp" id="adm-name" placeholder="Product Name" style="margin-bottom:0"/>
+      <input class="inp" id="adm-brand" placeholder="Brand" style="margin-bottom:0"/>
+      <input class="inp" id="adm-price" placeholder="Selling Price (₹)" type="number" style="margin-bottom:0"/>
+      <input class="inp" id="adm-mrp" placeholder="MRP (₹)" type="number" style="margin-bottom:0"/>
+      <select class="inp" id="adm-cat" style="margin-bottom:0">
+        <option value="">Select Category</option>
+        <option>Grocery</option><option>Beverages</option><option>Home</option><option>Stationery</option>
+      </select>
+      <select class="inp" id="adm-badge" style="margin-bottom:0">
+        <option value="">No Badge</option>
+        <option value="Best Value">Best Value</option>
+        <option value="Top Pick">Top Pick</option>
+      </select>
+    </div>
+    <input class="inp" id="adm-imgurl" placeholder="Image URL (paste a product photo URL)" style="margin-top:10px"/>
+    <input class="inp" id="adm-seller" placeholder="Seller Name" style="margin-top:0"/>
+    <div id="adm-preview" style="display:none;margin-bottom:10px">
+      <div style="font-size:12px;color:var(--muted);margin-bottom:6px">Image Preview:</div>
+      <img id="adm-img-preview" style="width:80px;height:80px;object-fit:cover;border-radius:8px;border:1px solid var(--border)"/>
+    </div>
+    <button class="btn btn-primary" onclick="adminAddProduct()" style="margin-top:4px">✅ Add Product</button>
+    <div id="adm-msg" style="font-size:13px;color:var(--green);font-weight:700;display:none;margin-top:6px"></div>
+  </div>
+  <!-- Product List -->
+  <div class="summary-box">
+    <div style="font-weight:800;font-size:15px;color:var(--navy);margin-bottom:14px">📦 All Products (<span id="adm-count"></span>)</div>
+    <div id="adm-product-list"></div>
+  </div>
+
+  <!-- ── DELIVERY PARTNER MANAGEMENT ── -->
+  <div style="background:#fff;border:1px solid var(--border);border-radius:16px;padding:20px;margin-top:24px;box-shadow:0 2px 8px rgba(0,0,0,.06)">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px">
+      <div style="font-weight:800;font-size:17px;color:var(--navy)">🚚 Delivery Partner Management</div>
+      <button onclick="openCreatePartnerModal()" style="background:linear-gradient(135deg,#c2410c,#f97316);border:none;border-radius:10px;padding:10px 18px;color:#fff;font-weight:700;font-size:13px;cursor:pointer;font-family:inherit">+ Create Partner</button>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px" id="adm-dp-stats"></div>
+    <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:10px">Riders</div>
+    <div id="adm-dp-list"></div>
+    <div style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-top:20px;margin-bottom:10px">Unassigned Orders</div>
+    <div id="adm-unassigned-orders"></div>
+  </div>
+
+  <!-- Create Partner Modal -->
+  <div id="create-partner-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:3000;align-items:center;justify-content:center">
+    <div style="background:#fff;border-radius:18px;padding:28px 24px;width:360px;max-width:92vw;border:1px solid var(--border);box-shadow:0 20px 60px rgba(0,0,0,.15)">
+      <div style="font-weight:800;font-size:18px;color:var(--navy);margin-bottom:4px">Create Delivery Partner</div>
+      <div style="font-size:13px;color:var(--muted);margin-bottom:20px">Admin-generated account</div>
+      <input class="dp-inp" id="cp-name" placeholder="Partner Full Name"/>
+      <input class="dp-inp" id="cp-phone" placeholder="Phone Number" type="tel"/>
+      <input class="dp-inp" id="cp-pw" placeholder="Set Password" type="password"/>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:16px">Delivery ID auto-generated (SV001, SV002…)</div>
+      <div id="cp-msg" style="display:none;font-size:13px;font-weight:700;margin-bottom:12px;text-align:center"></div>
+      <button class="dp-btn-main" onclick="createDeliveryPartner()">Create Account</button>
+      <button class="dp-btn-ghost" onclick="document.getElementById('create-partner-modal').style.display='none'">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── BOTTOM NAV ── -->
+<div id="bottom-nav">
+  <button class="nav-item active" id="nav-home" onclick="nav('home')"><span class="nav-icon">🏠</span>Home</button>
+  <button class="nav-item" id="nav-listing" onclick="nav('listing')"><span class="nav-icon">🔍</span>Shop</button>
+  <button class="nav-item" id="nav-cart" onclick="nav('cart')"><span class="nav-icon">🛒</span><span id="nav-badge" class="nav-badge" style="display:none">0</span>Cart</button>
+  <button class="nav-item" id="nav-account" onclick="nav('account')"><span class="nav-icon">👤</span>Account</button>
+</div>
+
+<!-- ── AI ASSISTANT FLOATING BUTTON ── -->
+<div id="ai-fab-wrap" style="position:fixed;bottom:calc(78px + env(safe-area-inset-bottom));right:calc(16px + env(safe-area-inset-right));z-index:500;transform:translateZ(0)">
+  <div id="ai-chat-popup" style="display:none;position:absolute;bottom:68px;right:0;width:320px;max-width:90vw;background:#fff;border-radius:18px;box-shadow:0 16px 50px rgba(194,65,12,.2);border:1px solid #e8edf5;overflow:hidden;animation:fadeIn .25s ease">
+    <div style="background:linear-gradient(135deg,#c2410c,#f97316);padding:14px 16px;display:flex;align-items:center;gap:10px">
+      <div style="width:36px;height:36px;background:rgba(255,255,255,.2);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;border:2px solid rgba(255,255,255,.3)">🤖</div>
+      <div>
+        <div style="font-weight:700;font-size:14px;color:#fff">Sri Vari Assistant</div>
+        <div style="font-size:11px;color:rgba(255,255,255,.75);display:flex;align-items:center;gap:4px"><span style="width:6px;height:6px;background:#22c55e;border-radius:50%;display:inline-block"></span>Online · AI-powered</div>
+      </div>
+      <button onclick="toggleAIFab()" style="margin-left:auto;background:rgba(255,255,255,.15);border:none;color:#fff;border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;font-size:14px;cursor:pointer">✕</button>
+    </div>
+    <div id="ai-fab-messages" style="height:220px;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:10px">
+      <div style="background:#fff7ed;border-radius:12px 12px 12px 4px;padding:10px 13px;font-size:13px;color:#c2410c;max-width:85%;line-height:1.5">
+        Hi! I'm your Sri Vari assistant 👋<br/>Ask me about orders, delivery, products, or returns.
+        <div style="font-size:10px;color:#9ca3af;margin-top:4px">Just now</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:6px;padding:8px 12px;border-top:1px solid #f0f4f8;overflow-x:auto;scrollbar-width:none">
+      <button onclick="fabChip('Track my order')" style="background:#fff7ed;border:1px solid #fed7aa;color:#c2410c;border-radius:20px;padding:5px 12px;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:inherit">📦 Track order</button>
+      <button onclick="fabChip('Delivery timings')" style="background:#fff7ed;border:1px solid #fed7aa;color:#c2410c;border-radius:20px;padding:5px 12px;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:inherit">🚚 Delivery</button>
+      <button onclick="fabChip('Return policy')" style="background:#fff7ed;border:1px solid #fed7aa;color:#c2410c;border-radius:20px;padding:5px 12px;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap;font-family:inherit">↩️ Returns</button>
+    </div>
+    <div style="display:flex;gap:0;padding:10px 12px 12px;gap:8px">
+      <input id="ai-fab-input" type="text" placeholder="Ask anything…" style="flex:1;border:1.5px solid #e8edf5;border-radius:10px;padding:9px 13px;font-size:13px;outline:none;font-family:inherit" onkeydown="if(event.key==='Enter')sendFabMessage()"/>
+      <button onclick="sendFabMessage()" style="background:linear-gradient(135deg,#c2410c,#f97316);color:#fff;border:none;border-radius:10px;padding:0 14px;font-size:16px;cursor:pointer">➤</button>
+    </div>
+  </div>
+  <button onclick="toggleAIFab()" id="ai-fab-btn" style="width:54px;height:54px;background:linear-gradient(135deg,#c2410c,#f97316);border:none;border-radius:50%;color:#fff;font-size:24px;box-shadow:0 6px 20px rgba(194,65,12,.4);cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;animation:botPulse 2.5s infinite">🤖</button>
+</div>
+
+<script>
+// ── DATA ──────────────────────────────────────────────────────────────────
+// Products are loaded from Firebase only — no hardcoded BASE_PRODUCTS
+const BASE_PRODUCTS = []; // kept for safety, Firebase is source of truth
+
+// Firebase is the source of truth for products — localStorage no longer used
+function saveProductsToStorage() {
+  // Deprecated: Firebase is now the source of truth. No-op kept for safety.
+}
+
+const PRODUCTS = [];
+
+// ── ORDER HISTORY ─────────────────────────────────────────────────────────
+// Orders stored per user in localStorage — no shared fake history
+
+// ── STATE ──────────────────────────────────────────────────────────────────
+let cart = {};
+let wishlist = new Set();
+let currentPage = 'home';
+let selectedCat = 'All';
+let searchQ = '';
+let viewMode = 'grid';
+let sortBy = 'popularity';
+let priceMax = 200;
+let ratingMin = 0;
+let selectedProduct = null;
+let orderConfirm = null;
+let checkoutStep = 1;
+let accTab = 'orders';
+let customerInfo = {};
+
+// ── HELPERS ──────────────────────────────────────────────────────────────
+function stars(rating, size=13) {
+  const full = Math.floor(rating), half = rating%1>=.5;
+  return `<span class="stars" style="font-size:${size}px">${'★'.repeat(full)}${half?'½':''}${'☆'.repeat(5-full-(half?1:0))}</span>`;
+}
+
+function deliveryBadgeHTML() {
+  const h = new Date().getHours();
+  return h < 18
+    ? `<span class="del-badge del-today">🚚 Delivery today, 7–9 PM</span>`
+    : `<span class="del-badge del-tmrw">🚚 Delivery tomorrow, 7–9 PM</span>`;
+}
+
+function cartTotal() {
+  return Object.entries(cart).reduce((s,[id,q])=>{
+    const p=PRODUCTS.find(p=>p.id===+id); return s+(p?p.price*q:0);
+  },0);
+}
+function cartCount() { return Object.values(cart).reduce((s,q)=>s+q,0); }
+function deliveryFee() {
+  const t = cartTotal();
+  if(t === 0) return 0;
+  if(getFreeDeliveriesLeft() > 0) return 0; // first 2 orders free
+  return 10; // ₹10 after free deliveries used
+}
+function orderTotal() { return cartTotal()+deliveryFee(); }
+
+function cartItems() {
+  return Object.entries(cart).filter(([,q])=>q>0).map(([id,q])=>({p:PRODUCTS.find(p=>p.id===+id),q})).filter(x=>x.p);
+}
+
+function showToast(msg) {
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2200);
+}
+
+function updateCartUI() {
+  const c=cartCount();
+  ['cart-badge','nav-badge','hdr-cart-badge'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el){el.textContent=c;el.style.display=c>0?'flex':'none';}
+  });
+}
+
+// ── AI FAB ASSISTANT ────────────────────────────────────────────────────
+let aiFabOpen = false;
+function toggleAIFab() {
+  aiFabOpen = !aiFabOpen;
+  const popup = document.getElementById('ai-chat-popup');
+  const btn = document.getElementById('ai-fab-btn');
+  popup.style.display = aiFabOpen ? 'block' : 'none';
+  btn.textContent = aiFabOpen ? '✕' : '🤖';
+  btn.style.fontSize = aiFabOpen ? '20px' : '24px';
+}
+function fabChip(text) {
+  document.getElementById('ai-fab-input').value = text;
+  sendFabMessage();
+}
+async function sendFabMessage() {
+  const inp = document.getElementById('ai-fab-input');
+  const text = inp.value.trim(); if(!text) return;
+  inp.value = '';
+  const msgList = document.getElementById('ai-fab-messages');
+  msgList.innerHTML += `<div style="background:linear-gradient(135deg,#c2410c,#f97316);border-radius:12px 12px 4px 12px;padding:10px 13px;font-size:13px;color:#fff;max-width:85%;align-self:flex-end;margin-left:auto;line-height:1.5">${text}</div>`;
+  msgList.scrollTop = msgList.scrollHeight;
+  const thinkingId = 'fab-think-'+Date.now();
+  msgList.innerHTML += `<div id="${thinkingId}" style="background:#fff7ed;border-radius:12px 12px 12px 4px;padding:10px 13px;font-size:13px;color:#9ca3af;max-width:85%">✦ Thinking…</div>`;
+  msgList.scrollTop = msgList.scrollHeight;
+  try {
+    const resp = await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:400,
+        system:`You are Sri Vari's friendly shopping assistant. Sri Vari is a local e-commerce grocery/daily needs app. Be concise (2-3 sentences max). Help with: orders, delivery (7-9PM daily, free above ₹300), returns (3 days), payment (UPI/Cards/COD). Current products loaded from Firebase.`,
+        messages:[{role:'user',content:text}]})
+    });
+    const d = await resp.json();
+    const reply = d.content?.[0]?.text || 'I am here to help! Please contact support for more details.';
+    document.getElementById(thinkingId).outerHTML = `<div style="background:#fff7ed;border-radius:12px 12px 12px 4px;padding:10px 13px;font-size:13px;color:#c2410c;max-width:85%;line-height:1.5">${reply}<div style="font-size:10px;color:#9ca3af;margin-top:4px">Sri Vari AI</div></div>`;
+  } catch(e) {
+    document.getElementById(thinkingId).outerHTML = `<div style="background:#fff7ed;border-radius:12px 12px 12px 4px;padding:10px 13px;font-size:13px;color:#c2410c;max-width:85%">Our delivery runs daily 7–9 PM. Free delivery on orders above ₹300. COD available!</div>`;
+  }
+  msgList.scrollTop = msgList.scrollHeight;
+}
+
+function addToCart(id) {
+  cart[id]=(cart[id]||0)+1;
+  updateCartUI();
+  showToast('Added to cart ✓');
+  reRenderCards();
+}
+
+function removeFromCart(id) {
+  if(!cart[id]) return;
+  if(cart[id]>1) cart[id]--;
+  else delete cart[id];
+  updateCartUI();
+  reRenderCards();
+}
+
+function removeFromCartFull(id) {
+  delete cart[id];
+  updateCartUI();
+  reRenderCards();
+}
+
+function toggleWish(id) {
+  if(wishlist.has(id)){wishlist.delete(id);showToast('Removed from wishlist');}
+  else{wishlist.add(id);showToast('Added to wishlist ♥');}
+  reRenderCards();
+}
+
+function reRenderCards() {
+  if(currentPage==='home') renderHome();
+  else if(currentPage==='listing') renderListing();
+  else if(currentPage==='product' && selectedProduct) renderProduct();
+  else if(currentPage==='cart') renderCart();
+  else if(currentPage==='checkout') renderCheckout();
+}
+
+// ── NAVIGATION ──────────────────────────────────────────────────────────
+function nav(page, cat) {
+  if(cat) selectedCat=cat;
+  const pages=['home','listing','product','cart','checkout','confirm','account','admin'];
+  pages.forEach(p=>document.getElementById('page-'+p).classList.toggle('page-hidden',p!==page));
+  ['home','listing','cart','account'].forEach(p=>{
+    const el=document.getElementById('nav-'+p);
+    if(el) el.classList.toggle('active',p===page);
+  });
+  currentPage=page;
+  window.scrollTo(0,0);
+
+  // Sync top subnav category highlight
+  document.querySelectorAll('.subnav-btn').forEach(b=>b.classList.remove('active'));
+  if(page==='listing') {
+    const snEl = document.getElementById('snav-'+(selectedCat||'all'));
+    if(snEl) snEl.classList.add('active');
+  } else if(page==='home') {
+    const allEl = document.getElementById('snav-all');
+    if(allEl) allEl.classList.add('active');
+  }
+
+  if(page==='home') renderHome();
+  else if(page==='listing') renderListing();
+  else if(page==='cart') renderCart();
+  else if(page==='checkout'){checkoutStep=1;renderCheckout();}
+  else if(page==='account') renderAccount();
+}
+
+function doSearch() {
+  searchQ = (document.getElementById('hero-search')||{}).value
+         || document.getElementById('search-input').value || '';
+  nav('listing');
+}
+
+document.getElementById('search-input').addEventListener('input', function() {
+  searchQ = this.value.trim();
+  if(searchQ.length > 0) {
+    selectedCat = 'All';
+    nav('listing');
+  }
+});
+document.getElementById('search-input').addEventListener('keydown',e=>{if(e.key==='Enter')doSearch();});
+
+// ── IMAGE HELPER ─────────────────────────────────────────────────────────
+function imgError(el, emoji, size) {
+  el.parentNode.innerHTML = '<span style="font-size:'+size+'px;display:flex;align-items:center;justify-content:center;width:100%;height:100%">'+emoji+'</span>';
+}
+
+function productImg(p, w, h, radius) {
+  w = w||100; h = h||100; radius = radius||10;
+  const sz = Math.round(h * 0.5);
+  const style = 'width:'+w+'px;height:'+h+'px;margin:0 auto 8px;border-radius:'+radius+'px;overflow:hidden;background:#f3f4f6;display:flex;align-items:center;justify-content:center;flex-shrink:0';
+  if(p.imgUrl && p.imgUrl.trim() !== '') {
+    const id = 'img-'+p.id+'-'+w;
+    return '<div style="'+style+'" id="'+id+'"><img src="'+p.imgUrl+'" style="width:100%;height:100%;object-fit:cover;display:block" onerror="imgError(this, \''+p.img+'\', '+sz+')" /></div>';
+  }
+  return '<div style="'+style+'"><span style="font-size:'+sz+'px">'+p.img+'</span></div>';
+}
+
+// ── CARD HTML ────────────────────────────────────────────────────────────
+function cardHTML(p) {
+  const disc=p.mrp>p.price?Math.round((1-p.price/p.mrp)*100):0;
+  const inCart=cart[p.id]||0;
+  const wished=wishlist.has(p.id);
+  const qtyHTML = inCart===0
+    ? '<button class="add-btn" onclick="event.stopPropagation();addToCart('+p.id+')">Add to Cart</button>'
+    : '<div class="qty-ctrl"><button class="qty-btn" onclick="event.stopPropagation();removeFromCart('+p.id+')">−</button><span class="qty-num">'+inCart+'</span><button class="qty-btn" onclick="event.stopPropagation();addToCart('+p.id+')">+</button></div>';
+
+  const imgSection = (p.imgUrl && p.imgUrl.trim())
+    ? '<div style="width:100%;height:120px;border-radius:8px;overflow:hidden;background:#f3f4f6;margin-bottom:10px"><img src="'+p.imgUrl+'" style="width:100%;height:100%;object-fit:cover;display:block" onerror="imgError(this, \''+p.img+'\', 44)" /></div>'
+    : '<div style="width:100%;height:120px;border-radius:8px;background:#f3f4f6;margin-bottom:10px;display:flex;align-items:center;justify-content:center;font-size:52px">'+p.img+'</div>';
+
+  return '<div class="card" onclick="openProduct('+p.id+')">'
+    +(p.badge?'<span class="badge '+(p.badge==='Best Value'?'badge-value':'badge-top')+'">'+p.badge+'</span>':'')
+    +'<button class="wish-btn'+(wished?' active':'')+'" onclick="event.stopPropagation();toggleWish('+p.id+')">♥</button>'
+    +imgSection
+    +'<div class="card-name">'+p.name+'</div>'
+    +'<div class="card-brand">'+p.brand+'</div>'
+    +stars(p.rating,11)
+    +'<div style="margin-bottom:6px"><span class="card-price">₹'+p.price+'</span>'
+    +(p.mrp>p.price?'<span class="card-mrp">₹'+p.mrp+'</span><span class="card-disc">'+disc+'% off</span>':'')
+    +'</div>'
+    +'<div onclick="event.stopPropagation()">'+qtyHTML+'</div>'
+    +'</div>';
+}
+
+// ── HOME ────────────────────────────────────────────────────────────────
+function renderHome() {
+  const el = document.getElementById('home-all-products');
+  if (!el) return;
+  if (PRODUCTS.length === 0) {
+    el.innerHTML = '<div style="text-align:center;padding:40px;color:var(--muted);grid-column:1/-1"><div style="font-size:40px;margin-bottom:8px">⏳</div><div>Loading products...</div></div>';
+    return;
+  }
+  el.innerHTML = PRODUCTS.map(p => cardHTML(p)).join('');
+}
+
+// ── LISTING ─────────────────────────────────────────────────────────────
+function setView(v) {
+  viewMode=v;
+  document.getElementById('view-grid').style.background=v==='grid'?'var(--navy)':'var(--border)';
+  document.getElementById('view-grid').style.color=v==='grid'?'#fff':'#374151';
+  document.getElementById('view-list').style.background=v==='list'?'var(--navy)':'var(--border)';
+  document.getElementById('view-list').style.color=v==='list'?'#fff':'#374151';
+  renderListing();
+}
+
+function renderListing() {
+  sortBy=document.getElementById('sort-select').value;
+  priceMax=9999;
+  document.getElementById('listing-title').textContent=(selectedCat==='All'?'All Products':selectedCat);
+
+  // Filter & sort
+  let list=[...PRODUCTS];
+  if(selectedCat!=='All') list=list.filter(p=>p.cat===selectedCat);
+  if(searchQ) list=list.filter(p=>p.name.toLowerCase().includes(searchQ.toLowerCase()));
+  list=list.filter(p=>p.price<=priceMax&&p.rating>=ratingMin);
+  if(sortBy==='price-asc') list.sort((a,b)=>a.price-b.price);
+  else if(sortBy==='price-desc') list.sort((a,b)=>b.price-a.price);
+  else if(sortBy==='rating') list.sort((a,b)=>b.rating-a.rating);
+  else list.sort((a,b)=>b.reviews-a.reviews);
+
+  document.getElementById('listing-title').textContent=`${selectedCat==='All'?'All Products':selectedCat} (${list.length})`;
+
+  const grid=document.getElementById('listing-grid');
+  if(list.length===0){
+    grid.innerHTML=`<div style="text-align:center;padding:60px;color:var(--muted)"><div style="font-size:48px;margin-bottom:12px">🔍</div><div style="font-weight:600">No products found</div></div>`;
+    return;
+  }
+  grid.className='grid';
+  grid.innerHTML=list.map(p=>cardHTML(p)).join('');
+}
+
+// ── PRODUCT PAGE ─────────────────────────────────────────────────────────
+function openProduct(id) {
+  selectedProduct=PRODUCTS.find(p=>p.id===id);
+  nav('product');
+  renderProduct();
+}
+
+function renderProduct() {
+  const p=selectedProduct; if(!p) return;
+  const inCart=cart[p.id]||0, disc=p.mrp>p.price?Math.round((1-p.price/p.mrp)*100):0;
+  const h=new Date().getHours(), m=new Date().getMinutes();
+  const toCutoff=18-h-m/60;
+  const wished=wishlist.has(p.id);
+
+  const qtySection = inCart===0 ? `
+    <div style="display:flex;gap:10px;margin-bottom:10px">
+      <button class="btn btn-primary" style="margin:0;flex:1" onclick="addToCart(${p.id})">🛒 Add to Cart</button>
+      <button class="btn btn-secondary" style="margin:0;flex:1" onclick="addToCart(${p.id});nav('cart')">⚡ Buy Now</button>
+    </div>`
+  : `<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+      <button class="qty-btn" style="width:40px;height:40px;font-size:20px" onclick="removeFromCart(${p.id})">−</button>
+      <span class="qty-num" style="font-size:18px;width:44px">${inCart}</span>
+      <button class="qty-btn" style="width:40px;height:40px;font-size:20px;background:var(--navy);color:#fff" onclick="addToCart(${p.id})">+</button>
+      <span style="font-size:13px;color:var(--muted)">in cart</span>
+    </div>
+    <button class="btn btn-secondary" onclick="nav('cart')">Go to Cart →</button>`;
+
+  document.getElementById('prod-content').innerHTML=`
+    <div class="prod-img-box">
+      ${p.badge?`<span class="badge ${p.badge==='Best Value'?'badge-value':'badge-top'}" style="font-size:11px">${p.badge}</span>`:''}
+      ${productImg(p, 200, 200, 12)}
+    </div>
+    <div style="flex:1;min-width:260px">
+      <div style="font-size:11px;color:var(--muted);margin-bottom:4px">${p.cat} › ${p.brand}</div>
+      <h1 style="font-size:22px;font-weight:800;margin-bottom:8px">${p.name}</h1>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+        ${stars(p.rating,16)} <span style="color:var(--navy);font-weight:700">${p.rating}</span>
+        <span style="color:var(--muted);font-size:13px">(${p.reviews} reviews)</span>
+      </div>
+      <div style="background:#f8fafc;border-radius:10px;padding:14px;margin-bottom:16px">
+        <div style="font-size:28px;font-weight:800;color:var(--navy)">₹${p.price}
+          ${p.mrp>p.price?`<span style="font-size:16px;color:#9ca3af;text-decoration:line-through;margin-left:8px">₹${p.mrp}</span><span style="font-size:14px;color:var(--green);margin-left:8px">${disc}% off</span>`:''}
+        </div>
+        <div style="font-size:12px;color:var(--muted);margin-top:4px">Inclusive of all taxes</div>
+        <div style="margin-top:8px;font-size:12px">🏪 Sold by <strong>${p.seller}</strong>
+          <span style="margin-left:8px;background:#ecfdf5;color:var(--green);border-radius:4px;padding:2px 7px;font-size:11px;font-weight:700">★ ${p.sellerRating}</span>
+        </div>
+      </div>
+      <div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:12px;margin-bottom:16px">
+        <div style="font-weight:700;font-size:13px;margin-bottom:6px;color:#9a3412">📦 Delivery Info</div>
+        ${deliveryBadgeHTML()}
+        ${toCutoff>0?`<div style="font-size:12px;color:var(--muted);margin-top:6px">⏰ Order in ${Math.floor(toCutoff)}h ${Math.floor((toCutoff%1)*60)}m for delivery today (7–9 PM)</div>`:''}
+        <div style="font-size:12px;color:var(--muted);margin-top:4px">🚛 Free delivery on orders above ₹300</div>
+      </div>
+      ${qtySection}
+      <button onclick="toggleWish(${p.id})" style="width:100%;background:#fff;border:1.5px solid var(--border);border-radius:10px;padding:10px;font-weight:700;font-size:14px;color:${wished?'var(--red)':'#374151'};font-family:inherit;margin-bottom:20px">
+        ${wished?'♥ Saved to Wishlist':'♡ Save to Wishlist'}
+      </button>
+      <div class="sec-title">Product Details</div>
+      <table class="spec-table">
+        ${[['Brand',p.brand],['Category',p.cat],['Seller',p.seller],['Seller Rating',`★ ${p.sellerRating}`]].map(([k,v])=>`<tr><td>${k}</td><td style="font-weight:500">${v}</td></tr>`).join('')}
+      </table>
+      <div style="margin-top:20px">
+        <div class="sec-title">Customer Reviews</div>
+        ${[['Priya M.',5,'Great quality, delivered on time!'],['Rajan K.',4,'Good value for money.'],['Sneha T.',5,'Will order again, very satisfied!']].map(([n,r,t])=>`
+          <div class="review-card">
+            <div style="display:flex;justify-content:space-between;margin-bottom:4px"><strong style="font-size:13px">${n}</strong>${stars(r,12)}</div>
+            <div style="font-size:13px;color:#374151">${t}</div>
+          </div>`).join('')}
+      </div>
+    </div>`;
+
+  const related=PRODUCTS.filter(x=>x.cat===p.cat&&x.id!==p.id).slice(0,4);
+  if(related.length) {
+    document.getElementById('related-section').innerHTML=`<div class="sec-title">Related Products</div><div class="grid">${related.map(p=>cardHTML(p)).join('')}</div>`;
+  }
+}
+
+// ── CART ────────────────────────────────────────────────────────────────
+function renderCart() {
+  const items=cartItems(), sub=cartTotal(), fee=deliveryFee(), tot=orderTotal(), count=cartCount();
+  const h=new Date().getHours();
+  const isToday=h<18;
+  const pct=sub>0?Math.min(100,(sub/300)*100):0;
+  const remaining=Math.max(0,300-sub);
+
+  if(items.length===0) {
+    document.getElementById('cart-content').innerHTML=`
+      <div style="text-align:center;padding:60px">
+        <div style="font-size:64px;margin-bottom:16px">🛒</div>
+        <div style="font-weight:700;font-size:18px;margin-bottom:8px;color:var(--navy)">Your cart is empty</div>
+        <div style="color:var(--muted);margin-bottom:20px">Add products to get started</div>
+        <button class="btn btn-primary" style="width:100%;max-width:320px" onclick="nav('listing')">Shop Now</button>
+      </div>`;
+    return;
+  }
+
+  document.getElementById('cart-content').innerHTML=`
+    <div style="display:flex;gap:20px;flex-wrap:wrap">
+      <div style="flex:1;min-width:300px">
+        <div style="background:${getFreeDeliveriesLeft()>0?'#ecfdf5':'#fff7ed'};border:1px solid ${getFreeDeliveriesLeft()>0?'#6ee7b7':'#fdba74'};border-radius:10px;padding:10px 14px;margin-bottom:14px;font-size:13px;font-weight:700;color:${getFreeDeliveriesLeft()>0?'#065f46':'#9a3412'}">
+          ${getFreeDeliveriesLeft()>0
+            ? `🚚 FREE delivery! (${getFreeDeliveriesLeft()} free order${getFreeDeliveriesLeft()>1?'s':''} left)`
+            : `🚚 ${isToday?'Get it today between 7–9 PM':'Delivery tomorrow between 7–9 PM'} · ₹10 delivery fee`}
+        </div>
+        ${items.map(({p,q})=>`
+          <div class="cart-row">
+            <span style="font-size:32px">${p.img}</span>
+            <div style="flex:1">
+              <div style="font-weight:700;font-size:14px">${p.name}</div>
+              <div style="font-size:12px;color:var(--muted)">${p.brand}</div>
+              <div style="font-size:12px;color:var(--muted);margin-top:2px">MRP: <span style="text-decoration:line-through">₹${p.mrp}</span>${p.mrp>p.price?` <span style="color:var(--green)">₹${p.price}</span>`:''}</div>
+            </div>
+            <div style="text-align:right">
+              <div style="font-weight:800;color:var(--navy);margin-bottom:8px">₹${p.price*q}</div>
+              <div class="qty-ctrl" style="margin-top:0">
+                <button class="qty-btn" onclick="removeFromCart(${p.id})">−</button>
+                <span class="qty-num">${q}</span>
+                <button class="qty-btn" onclick="addToCart(${p.id})">+</button>
+              </div>
+              <button onclick="removeFromCartFull(${p.id});renderCart()" style="background:none;border:none;color:var(--red);font-size:11px;margin-top:6px;font-family:inherit;cursor:pointer">Remove</button>
+            </div>
+          </div>`).join('')}
+      </div>
+      <div style="width:280px;flex-shrink:0">
+        <div class="summary-box">
+          <div style="font-weight:800;font-size:16px;margin-bottom:14px;color:var(--navy)">Order Summary</div>
+          ${getFreeDeliveriesLeft()>0
+            ? `<div style="background:#ecfdf5;border:1px solid #6ee7b7;border-radius:8px;padding:9px 12px;margin-bottom:12px;font-size:13px;color:#065f46;font-weight:700">🚚 Free delivery on this order! (${getFreeDeliveriesLeft()} left)</div>`
+            : sub>=300
+              ? `<div style="background:#ecfdf5;border:1px solid #6ee7b7;border-radius:8px;padding:9px 12px;margin-bottom:12px;font-size:13px;color:#065f46;font-weight:700">✓ Free delivery unlocked!</div>`
+              : `<div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;padding:9px 12px;margin-bottom:12px;font-size:13px;color:#9a3412">🛒 Add <strong>₹${300-sub}</strong> more to get <strong>FREE delivery!</strong></div>`}
+          <div class="sum-row"><span>Subtotal (${count} items)</span><span>₹${sub}</span></div>
+          <div class="sum-row"><span>Delivery Fee</span><span style="color:${fee===0?'var(--green)':'var(--red)'}">₹${fee===0?'FREE':fee}</span></div>
+          <div style="border-top:2px solid var(--border);padding-top:12px;margin-top:4px;display:flex;justify-content:space-between">
+            <strong>Total</strong><strong style="color:var(--navy);font-size:18px">₹${tot}</strong>
+          </div>
+          <button class="btn btn-primary" style="margin-top:14px" onclick="nav('checkout')">Proceed to Checkout →</button>
+          <button class="btn btn-default" onclick="nav('listing')">Continue Shopping</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+function saveCustomerInfo() {
+  const get = (id) => document.getElementById(id) || document.querySelector('#'+id);
+  const nameEl  = get('cust-name');
+  const phoneEl = get('cust-phone');
+  const addr1El = get('cust-addr1');
+  const addr2El = get('cust-addr2');
+  const cityEl  = get('cust-city');
+  const pinEl   = get('cust-pin');
+
+  if(!nameEl || !phoneEl || !addr1El || !cityEl || !pinEl) {
+    showToast('⚠️ Please scroll up and fill the form'); return;
+  }
+
+  const name  = nameEl.value.trim();
+  const phone = phoneEl.value.trim();
+  const addr1 = addr1El.value.trim();
+  const addr2 = addr2El ? addr2El.value.trim() : '';
+  const city  = cityEl.value.trim();
+  const pin   = pinEl.value.trim();
+
+  if(!name)  { showToast('⚠️ Enter your full name'); nameEl.focus(); return; }
+  if(!phone) { showToast('⚠️ Enter your phone number'); phoneEl.focus(); return; }
+  if(!addr1) { showToast('⚠️ Enter your address'); addr1El.focus(); return; }
+  if(!city)  { showToast('⚠️ Enter your city'); cityEl.focus(); return; }
+  if(!pin)   { showToast('⚠️ Enter PIN code'); pinEl.focus(); return; }
+
+  customerInfo = {name, phone, addr1, addr2, city, pin};
+  checkoutStep = 2;
+  renderCheckout();
+}
+
+// ── CHECKOUT ─────────────────────────────────────────────────────────────
+function renderCheckout() {
+  const h=new Date().getHours(), isToday=h<18;
+  const sub=cartTotal(), fee=deliveryFee(), tot=orderTotal();
+  const slotLabel=`${isToday?'Today':'Tomorrow'}, 7:00 PM – 9:00 PM`;
+
+  function stepCircle(n) {
+    const done=checkoutStep>n, active=checkoutStep===n;
+    return `<div class="step-circle" style="background:${done?'var(--green)':active?'var(--navy)':'var(--border)'};color:${done||active?'#fff':'#9ca3af'}">${done?'✓':n}</div>`;
+  }
+
+  let form='';
+  if(checkoutStep===1) {
+    // Load saved addresses for quick-fill
+    const uid = currentUser ? (currentUser.uid || currentUser.phone || 'guest') : 'guest';
+    const savedAddrs = JSON.parse(localStorage.getItem('scart_addrs_'+uid) || '[]');
+    const addrPicker = savedAddrs.length ? `
+      <div style="margin-bottom:12px">
+        <div style="font-size:12px;font-weight:700;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px">Saved Addresses</div>
+        ${savedAddrs.map((a,i)=>`
+          <button onclick="fillSavedAddr(${i})" style="display:flex;align-items:center;gap:10px;width:100%;background:#f0f7ff;border:1.5px solid #fed7aa;border-radius:10px;padding:10px 12px;margin-bottom:8px;cursor:pointer;font-family:inherit;text-align:left">
+            <span style="font-size:18px">${a.type==='Home'?'🏠':a.type==='Work'?'🏢':'📍'}</span>
+            <div><div style="font-weight:700;font-size:13px;color:var(--navy)">${a.type}</div><div style="font-size:12px;color:var(--muted)">${a.line1}, ${a.city} – ${a.pin}</div></div>
+            <span style="margin-left:auto;font-size:12px;color:var(--blue);font-weight:700">Use →</span>
+          </button>`).join('')}
+        <div style="font-size:12px;color:var(--muted);margin-bottom:10px;text-align:center">— or enter manually below —</div>
+      </div>` : '';
+    form=`
+    <div class="summary-box">
+      <div style="font-weight:700;font-size:15px;margin-bottom:14px">📍 Delivery Address</div>
+      ${addrPicker}
+      <input class="inp" id="cust-name" placeholder="Full Name *" value="${customerInfo.name||''}" oninput="customerInfo.name=this.value"/>
+      <input class="inp" id="cust-phone" placeholder="Phone Number *" type="tel" value="${customerInfo.phone||''}" oninput="customerInfo.phone=this.value"/>
+      <input class="inp" id="cust-addr1" placeholder="House No / Street *" value="${customerInfo.addr1||''}" oninput="customerInfo.addr1=this.value"/>
+      <input class="inp" id="cust-addr2" placeholder="Landmark (optional)" value="${customerInfo.addr2||''}" oninput="customerInfo.addr2=this.value"/>
+      <div style="display:flex;gap:8px">
+        <input class="inp" id="cust-city" placeholder="City *" style="flex:1" value="${customerInfo.city||''}" oninput="customerInfo.city=this.value"/>
+        <input class="inp" id="cust-pin" placeholder="PIN Code *" style="flex:1" value="${customerInfo.pin||''}" oninput="customerInfo.pin=this.value"/>
+      </div>
+      <div style="background:linear-gradient(135deg,#fff7ed,#f0fdf4);border:1px solid #fed7aa;border-radius:10px;padding:12px;margin-bottom:12px">
+        <div style="font-weight:700;color:var(--navy);font-size:13px;margin-bottom:8px">💳 Payment Method</div>
+        <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:8px">
+          <label style="display:flex;align-items:center;gap:10px;background:#fff7ed;border:2px solid #f97316;border-radius:10px;padding:10px 14px;cursor:pointer">
+            <input type="radio" name="payment-method" value="online" id="pay-online" checked style="accent-color:#f97316;width:16px;height:16px"/>
+            <div><div style="font-weight:700;font-size:13px;color:#c2410c">💳 Online Payment</div><div style="font-size:11px;color:#6b7280">UPI · Cards · Wallets · NetBanking</div></div>
+            <span style="margin-left:auto;font-size:10px;background:#f97316;color:#fff;padding:2px 8px;border-radius:4px;font-weight:700">Recommended</span>
+          </label>
+          <label style="display:flex;align-items:center;gap:10px;background:#fff;border:2px solid #e8edf5;border-radius:10px;padding:10px 14px;cursor:pointer" id="cod-option">
+            <input type="radio" name="payment-method" value="cod" id="pay-cod" style="accent-color:#f97316;width:16px;height:16px"/>
+            <div><div style="font-weight:700;font-size:13px;color:#c2410c">💵 Cash on Delivery</div><div style="font-size:11px;color:#6b7280">Pay when your order arrives</div></div>
+          </label>
+        </div>
+        <div style="font-size:11px;color:#065f46;font-weight:600">🔒 Secure checkout · 100% safe</div>
+      </div>
+      <div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;padding:12px;margin-bottom:12px;font-size:13px">
+        <strong>🚚 Delivery Slot:</strong> ${slotLabel}
+      </div>
+      <button class="btn btn-primary" onclick="saveCustomerInfo()">Continue to Review →</button>
+    </div>`;
+  } else form=`
+    <div class="summary-box">
+      <div style="font-weight:700;font-size:15px;margin-bottom:14px">📋 Review Order</div>
+      <div style="background:#f8fafc;border-radius:8px;padding:12px;margin-bottom:12px;font-size:13px">
+        <div style="font-weight:700;margin-bottom:6px;color:var(--navy)">📍 Delivery To:</div>
+        <div><strong>${customerInfo.name}</strong> · 📞 ${customerInfo.phone}</div>
+        <div style="color:var(--muted);margin-top:2px">${customerInfo.addr1}${customerInfo.addr2?', '+customerInfo.addr2:''}, ${customerInfo.city} – ${customerInfo.pin}</div>
+      </div>
+      ${cartItems().map(({p,q})=>`<div style="display:flex;justify-content:space-between;margin-bottom:8px;font-size:13px"><span>${p.img} ${p.name} × ${q}</span><strong>₹${p.price*q}</strong></div>`).join('')}
+      <div style="border-top:1px solid var(--border);margin-top:10px;padding-top:10px">
+        <div class="sum-row"><span>Payment</span><span style="font-weight:700;color:${customerInfo.payMethod==='cod'?'#059669':'#ea580c'}">${customerInfo.payMethod==='cod'?'💵 Cash on Delivery':'💳 UPI / Card'}</span></div>
+        <div class="sum-row"><span>Delivery Slot</span><span style="font-weight:700;color:var(--blue)">${slotLabel}</span></div>
+        <div class="sum-row"><span>Delivery Fee</span><span style="color:${fee===0?'var(--green)':'#374151'}">${fee===0?'FREE':'₹'+fee}</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:16px;font-weight:800"><span>Total</span><span>₹${tot}</span></div>
+      </div>
+      ${customerInfo.payMethod==='cod'
+        ? `<button class="btn btn-primary" style="margin-top:12px;background:linear-gradient(135deg,#059669,#047857)" onclick="placeCODOrder()">✅ Confirm Order (Pay on Delivery) →</button>
+           <div style="text-align:center;font-size:11px;color:var(--muted);margin-top:8px">💵 Pay ₹${tot} in cash when order arrives</div>`
+        : `<button class="btn btn-primary" style="margin-top:12px" onclick="placeOnlineOrder()">✅ Place Order →</button>
+           <div style="text-align:center;font-size:11px;color:var(--muted);margin-top:8px">🔒 Secure · UPI · Cards · Wallets</div>`}
+    </div>`;
+
+  const _codSelected = false; // placeholder
+  document.getElementById('checkout-content').innerHTML=`
+    <div class="step-bar">
+      ${stepCircle(1)}<span class="step-label" style="font-weight:${checkoutStep===1?700:400};color:${checkoutStep===1?'var(--navy)':'var(--muted)'}">Address</span>
+      <div class="step-line" style="background:${checkoutStep>1?'var(--green)':'var(--border)'}"></div>
+      ${stepCircle(2)}<span class="step-label" style="font-weight:${checkoutStep===2?700:400};color:${checkoutStep===2?'var(--navy)':'var(--muted)'}">Review</span>
+    </div>
+    <div style="display:flex;gap:20px;flex-wrap:wrap">
+      <div style="flex:1;min-width:280px">${form}</div>
+      <div style="width:240px;flex-shrink:0">
+        <div class="summary-box">
+          <div style="font-weight:700;margin-bottom:10px">Price Details</div>
+          <div class="sum-row"><span style="font-size:13px">Subtotal</span><span>₹${sub}</span></div>
+          <div class="sum-row"><span style="font-size:13px">Delivery</span><span style="color:${fee===0?'var(--green)':'#374151'}">₹${fee===0?'FREE':fee}</span></div>
+          <div style="border-top:2px solid var(--border);padding-top:10px;margin-top:4px;display:flex;justify-content:space-between"><strong>Total</strong><strong style="color:var(--navy)">₹${tot}</strong></div>
+          ${sub>=300?`<div style="margin-top:8px;font-size:12px;color:var(--green);font-weight:700">✓ You saved ₹10 on delivery!</div>`:''}
+        </div>
+      </div>
+    </div>`;
+}
+
+function placeOnlineOrder() {
+  // Simple UPI deep link / show payment confirmation without Razorpay
+  showToast('✅ Placing order…');
+  placeOrder('UPI-'+Date.now().toString().slice(-6));
+}
+
+function copyOrderId(id) {
+  navigator.clipboard.writeText(id).then(()=>{
+    showToast('Order ID copied! 📋');
+  }).catch(()=>{
+    showToast('Order ID: ' + id);
+  });
+}
+
+function sendTelegramNotification(order) {
+  const token = '8694777145:AAEfn8VOOVovur9MBTzjI4XKZz0U9wvcreQ';
+  const chatId = '7914840486';
+  const loginName = currentUser ? (currentUser.name || currentUser.email || 'Unknown') : 'Unknown';
+  const addr = customerInfo.addr1
+    + (customerInfo.addr2 ? ', ' + customerInfo.addr2 : '')
+    + ', ' + customerInfo.city + ' – ' + customerInfo.pin;
+
+  // Message 1 — Products list first
+  const msg1 =
+    `📦 *Order ${order.orderId} — Items:*\n\n` +
+    order.items.map(({p,q}) => `• ${p.name} × ${q}`).join('\n');
+
+  // Message 2 — Customer details + total
+  const msg2 =
+    `🆕 *NEW ORDER — ${order.orderId}*\n\n` +
+    `👤 *Name:* ${customerInfo.name}\n` +
+    `📞 *Number:* ${customerInfo.phone}\n` +
+    `📍 *Address:* ${addr}\n\n` +
+    `💳 *Payment ID:* ${order.paymentId || 'N/A'}\n` +
+    `✅ *Total: ₹${order.tot}*`;
+
+  // Send both messages
+  const sendMsg = (text) => fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({chat_id: chatId, text, parse_mode: 'Markdown'})
+  });
+  sendMsg(msg1);
+  setTimeout(() => sendMsg(msg2), 1000);
+}
+
+function fillSavedAddr(idx) {
+  const uid = currentUser ? (currentUser.uid || currentUser.phone || 'guest') : 'guest';
+  const addrs = JSON.parse(localStorage.getItem('scart_addrs_'+uid) || '[]');
+  const a = addrs[idx]; if(!a) return;
+  customerInfo.addr1 = a.line1;
+  customerInfo.addr2 = a.line2 || '';
+  customerInfo.city  = a.city;
+  customerInfo.pin   = a.pin;
+  // Fill inputs if visible
+  ['addr1','addr2','city','pin'].forEach(k=>{
+    const el=document.getElementById('cust-'+k); if(el) el.value=customerInfo[k]||'';
+  });
+  showToast('Address filled ✅');
+}
+
+
+// ── PAYMENT HANDLER (COD + Online) ───────────────────────────────────────
+function getSelectedPayment() {
+  const el = document.getElementById('pay-cod');
+  return (el && el.checked) ? 'cod' : 'online';
+}
+
+function handlePayment() {
+  const method = getSelectedPayment();
+  if (method === 'cod') {
+    placeCODOrder();
+  } else {
+    openRazorpay();
+  }
+}
+
+function placeCODOrder() {
+  const tot = orderTotal();
+  const orderId = 'SCT' + Date.now().toString().slice(-6);
+  const order = {
+    orderId,
+    items: cartItems(),
+    tot,
+    paymentId: 'COD',
+    paymentMethod: 'Cash on Delivery',
+    status: 'Confirmed',
+    slot: new Date().getHours() < 18 ? 'Today, 7–9 PM' : 'Tomorrow, 7–9 PM',
+    address: customerInfo,
+    date: new Date().toLocaleDateString('en-IN', {day:'numeric',month:'short',year:'numeric'})
+  };
+  orderConfirm = order;
+  decrementFreeDelivery();
+  saveOrderToFirebase(order);
+  sendTelegramNotification(order);
+  cart = {};
+  updateCartUI();
+  nav('confirm');
+  renderConfirm();
+  showToast('✅ Order placed! Pay on delivery.');
+}
+
+// ── RAZORPAY PAYMENT ─────────────────────────────────────────────────────
+const RAZORPAY_KEY = 'YOUR_KEY_ID_HERE'; // ← Replace with your Razorpay Key ID
+
+function openRazorpay() {
+  const tot = orderTotal();
+  if(typeof Razorpay === 'undefined') {
+    showToast('Payment gateway loading… try again'); return;
+  }
+  const options = {
+    key: RAZORPAY_KEY,
+    amount: tot * 100,          // paise
+    currency: 'INR',
+    name: 'Sri Vari',
+    description: 'Order Payment',
+    image: 'https://scart.co.in/icon-192.png',
+    prefill: {
+      name:    customerInfo.name  || '',
+      contact: customerInfo.phone || '',
+    },
+    notes: {
+      address: customerInfo.addr1 + ', ' + customerInfo.city
+    },
+    theme: { color: '#ea580c' },
+    modal: { escape: false },
+    handler: function(response) {
+      // Payment successful — complete the order
+      placeOrder(response.razorpay_payment_id);
+    }
+  };
+  const rzp = new Razorpay(options);
+  rzp.on('payment.failed', function(resp) {
+    showToast('❌ Payment failed: ' + resp.error.description);
+  });
+  rzp.open();
+}
+
+function placeOrder(paymentId) {
+  const h=new Date().getHours(), isToday=h<18;
+  orderConfirm={
+    orderId:'SCT'+Math.random().toString(36).slice(2,8).toUpperCase(),
+    items:cartItems(),
+    sub:cartTotal(), fee:deliveryFee(), tot:orderTotal(),
+    day:isToday?'Today':'Tomorrow', slot:'7:00 PM – 9:00 PM',
+    paymentId: paymentId || 'N/A'
+  };
+
+  // Update user order count and save order to their history
+  if(currentUser) {
+    currentUser.orderCount = (currentUser.orderCount || 0) + 1;
+    const key = currentUser.uid || currentUser.phone || 'guest';
+    const userOrders = JSON.parse(localStorage.getItem('scart_orders_'+key) || '[]');
+    userOrders.unshift({
+      orderId: orderConfirm.orderId,
+      date: new Date().toLocaleDateString('en-IN', {day:'numeric', month:'short', year:'numeric'}),
+      items: orderConfirm.items.slice(0,3).map(({p,q})=>`${p.name} ×${q}`).join(', '),
+      total: orderConfirm.tot,
+      status: 'Confirmed',
+      statusColor: 'var(--blue)',
+      statusBg: '#fff7ed'
+    });
+    localStorage.setItem('scart_orders_'+key, JSON.stringify(userOrders));
+    saveUserData(key, currentUser);
+  }
+
+  // Save to Firebase
+  saveOrderToFirebase(orderConfirm);
+  saveCustomerToFirebase(customerInfo.phone, customerInfo.name);
+
+  cart={};
+  updateCartUI();
+  nav('confirm');
+  renderConfirm();
+  sendTelegramNotification(orderConfirm);
+}
+
+// ── CONFIRM ──────────────────────────────────────────────────────────────
+function renderConfirm() {
+  if(!orderConfirm) return;
+  const o=orderConfirm;
+  document.getElementById('confirm-content').innerHTML=`
+    <div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:12px;padding:16px;margin-bottom:20px">
+      <div style="font-size:12px;color:#9a3412;font-weight:600;margin-bottom:6px">Your Order ID</div>
+      <div style="font-size:24px;font-weight:800;color:var(--navy);letter-spacing:2px;margin-bottom:8px">${o.orderId}</div>
+      <button onclick="copyOrderId('${o.orderId}')" style="background:var(--navy);color:#fff;border:none;border-radius:8px;padding:8px 18px;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer">📋 Copy Order ID</button>
+      <div style="font-size:12px;color:#9a3412;margin-top:8px">Save this ID to track your order</div>
+    </div>
+    <div class="summary-box" style="text-align:left;margin-bottom:16px">
+      <div style="font-weight:700;font-size:15px;margin-bottom:14px">Delivery Details</div>
+      <div style="background:#ecfdf5;border:1px solid #6ee7b7;border-radius:10px;padding:14px;margin-bottom:14px">
+        <div style="font-weight:800;color:#065f46;font-size:16px;margin-bottom:4px">📦 ${o.day}, ${o.slot}</div>
+        <div style="font-size:13px;color:#047857">Your order will be delivered within this time window.</div>
+      </div>
+      ${o.items.map(({p,q})=>`<div style="display:flex;justify-content:space-between;margin-bottom:6px;font-size:13px"><span>${p.img} ${p.name} × ${q}</span><strong>₹${p.price*q}</strong></div>`).join('')}
+      <div style="border-top:1px solid var(--border);margin-top:10px;padding-top:10px">
+        <div class="sum-row"><span>Subtotal</span><span>₹${o.sub}</span></div>
+        <div class="sum-row"><span>Delivery</span><span style="color:${o.fee===0?'var(--green)':'#374151'}">₹${o.fee===0?'FREE':o.fee}</span></div>
+        <div style="display:flex;justify-content:space-between;font-weight:800;font-size:16px"><span>Total Paid</span><span style="color:var(--navy)">₹${o.tot}</span></div>
+        ${o.paymentId&&o.paymentId!=='N/A'?`<div style="margin-top:8px;font-size:11px;color:var(--muted)">Payment ID: ${o.paymentId}</div>`:''}
+      </div>
+    </div>
+    <button class="btn btn-primary" onclick="nav('home')">Continue Shopping</button>
+    <button class="btn btn-default" onclick="nav('account')">Track Order</button>`;
+}
+
+// ── ACCOUNT ──────────────────────────────────────────────────────────────
+function setAccTab(tab, el) {
+  accTab=tab;
+  document.querySelectorAll('.acc-tab').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  renderAccount();
+}
+
+function renderAccount() {
+  updateAccountHeader();
+  let html='';
+  if(accTab==='orders') {
+    // Load only THIS user's orders
+    let userOrders = [];
+    if(currentUser) {
+      const key = currentUser.uid || currentUser.phone || 'guest';
+      userOrders = JSON.parse(localStorage.getItem('scart_orders_'+key) || '[]');
+    }
+    // Add current session order if not already saved
+    if(orderConfirm && (!userOrders.length || userOrders[0].orderId !== orderConfirm.orderId)) {
+      userOrders.unshift({
+        orderId: orderConfirm.orderId,
+        date: 'Today',
+        items: orderConfirm.items.slice(0,3).map(({p,q})=>`${p.name} ×${q}`).join(', '),
+        total: orderConfirm.tot,
+        status: 'Confirmed',
+        statusColor: 'var(--blue)',
+        statusBg: '#fff7ed'
+      });
+    }
+    html = userOrders.length ? userOrders.map(o=>`
+      <div class="summary-box" style="margin-bottom:12px">
+        <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:10px">
+          <div>
+            <div style="font-weight:700">Order #${o.orderId}</div>
+            <div style="font-size:12px;color:var(--muted)">${o.date}</div>
+          </div>
+          <span style="background:${o.statusBg};color:${o.statusColor};border-radius:6px;padding:4px 10px;font-size:12px;font-weight:700">${o.status}</span>
+        </div>
+        <div style="font-size:13px;color:#374151;margin-bottom:8px">${o.items}</div>
+        <div style="display:flex;justify-content:space-between;font-size:13px;border-top:1px solid var(--border);padding-top:8px;margin-top:4px">
+          <span style="color:var(--muted)">Total Paid</span>
+          <strong>₹${o.total}</strong>
+        </div>
+      </div>`).join('') :
+      `<div style="text-align:center;padding:40px;color:var(--muted)">
+        <div style="font-size:48px;margin-bottom:12px">📦</div>
+        <div style="font-weight:600;margin-bottom:8px">No orders yet</div>
+        <button class="btn btn-primary" style="width:auto;padding:10px 24px" onclick="nav('home')">Start Shopping</button>
+      </div>`;
+  } else if(accTab==='wishlist') {
+    html = wishlist.size===0
+      ? `<div style="text-align:center;padding:40px;color:var(--muted)"><div style="font-size:48px;margin-bottom:12px">♡</div><div style="font-weight:600">Your wishlist is empty</div></div>`
+      : `<div class="grid">${[...wishlist].map(id=>{const p=PRODUCTS.find(p=>p.id===id);return p?cardHTML(p):''}).join('')}</div>`;
+  } else if(accTab==='addresses') {
+    const uid = currentUser ? (currentUser.uid || currentUser.phone || 'guest') : 'guest';
+    const savedAddrs = JSON.parse(localStorage.getItem('scart_addrs_'+uid) || '[]');
+    const addrListHTML = savedAddrs.length
+      ? savedAddrs.map((a,i)=>`
+        <div style="background:#f8fafc;border-radius:10px;padding:14px;margin-bottom:10px;border:1px solid var(--border);display:flex;align-items:start;gap:10px">
+          <span style="font-size:20px">${a.type==='Home'?'🏠':a.type==='Work'?'🏢':'📍'}</span>
+          <div style="flex:1">
+            <div style="font-weight:700;font-size:13px;margin-bottom:2px">${a.type}</div>
+            <div style="font-size:13px;color:var(--muted)">${a.line1}${a.line2?', '+a.line2:''}, ${a.city} – ${a.pin}</div>
+          </div>
+          <button onclick="deleteAddress(${i})" style="background:none;border:none;color:#ef4444;cursor:pointer;font-size:16px;padding:2px">🗑</button>
+        </div>`).join('')
+      : `<div style="text-align:center;padding:24px 0;color:var(--muted)"><div style="font-size:36px;margin-bottom:8px">📍</div><div style="font-size:13px">No saved addresses yet</div></div>`;
+    html=`<div class="summary-box">
+      <div style="font-weight:700;margin-bottom:14px">📍 Saved Addresses</div>
+      ${addrListHTML}
+      <div id="addr-form-wrap" style="display:none;background:#f8fafc;border-radius:12px;padding:16px;border:1px solid var(--border);margin-top:10px">
+        <div style="font-weight:700;font-size:14px;margin-bottom:12px;color:var(--navy)">Add New Address</div>
+        <select class="inp" id="addr-type" style="margin-bottom:10px">
+          <option value="Home">🏠 Home</option>
+          <option value="Work">🏢 Work</option>
+          <option value="Other">📍 Other</option>
+        </select>
+        <input class="inp" id="addr-line1" placeholder="House / Flat No., Street Name *" style="margin-bottom:10px"/>
+        <input class="inp" id="addr-line2" placeholder="Area / Landmark (optional)" style="margin-bottom:10px"/>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+          <input class="inp" id="addr-city" placeholder="City *" style="margin-bottom:0"/>
+          <input class="inp" id="addr-pin" placeholder="PIN Code *" type="number" style="margin-bottom:0"/>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-primary" style="margin-bottom:0;flex:1" onclick="saveAddress()">Save Address</button>
+          <button class="btn btn-default" style="margin-bottom:0;width:auto;padding:12px 16px" onclick="document.getElementById('addr-form-wrap').style.display='none'">Cancel</button>
+        </div>
+        <div id="addr-err" style="display:none;color:var(--red);font-size:12px;font-weight:700;margin-top:8px;text-align:center"></div>
+      </div>
+      <button class="btn btn-outline" style="border-style:dashed;margin-top:10px" onclick="document.getElementById('addr-form-wrap').style.display='block';document.getElementById('addr-err').style.display='none'">+ Add New Address</button>
+    </div>`;
+  } else {
+    html=`<div class="ai-chat-wrapper">
+      <div class="ai-chat-card">
+        <div class="ai-chat-header">
+          <div class="ai-avatar-ring">
+            <div class="ai-avatar-inner">🤖<div class="ai-status-dot"></div></div>
+          </div>
+          <div class="ai-header-text">
+            <div class="name">Sri Vari Assistant</div>
+            <div class="status"><span style="width:6px;height:6px;background:#22c55e;border-radius:50%;display:inline-block"></span>Online &middot; AI-powered</div>
+          </div>
+          <div style="margin-left:auto;background:rgba(34,197,94,.15);border:1px solid rgba(34,197,94,.25);border-radius:20px;padding:4px 10px;font-size:11px;color:#6ee7b7;font-weight:600">● Live</div>
+        </div>
+        <div class="ai-messages" id="ai-msg-list">
+          <div class="msg-bubble msg-bot">
+            Hi! I am your Sri Vari assistant. I can help you with orders, products, delivery, and returns.<br/><br/>What can I help you with today?
+            <span class="msg-time">Just now</span>
+          </div>
+        </div>
+        <div class="ai-quick-chips" id="ai-chips">
+          <button class="ai-chip" onclick="sendChip(this,'Track my order')">Track order</button>
+          <button class="ai-chip" onclick="sendChip(this,'Delivery timings')">Delivery info</button>
+          <button class="ai-chip" onclick="sendChip(this,'Return policy')">Returns</button>
+          <button class="ai-chip" onclick="sendChip(this,'Payment methods')">Payments</button>
+        </div>
+        <div class="ai-input-bar">
+          <input class="ai-input" id="ai-input" type="text" placeholder="Ask me anything about Sri Vari..." onkeydown="if(event.key==='Enter')sendAIMessage()"/>
+          <button class="ai-send-btn" id="ai-send-btn" onclick="sendAIMessage()">&#10148;</button>
+        </div>
+        <div class="ai-trust-strip">All products verified &middot; Secure checkout &middot; 100% authentic</div>
+      </div>
+    </div>`;
+    setTimeout(initAIChat, 0);
+  }
+  document.getElementById('acc-content').innerHTML=html;
+}
+
+// ── GOOGLE LOGIN ──────────────────────────────────────────────────────────
+let currentUser = null;
+let pendingGoogleUser = null;
+
+function getFreeDeliveriesLeft() {
+  if(!currentUser) return 3;
+  return Math.max(0, (currentUser.freeDeliveries||2) - (currentUser.orderCount||0));
+}
+function updateDeliveryInfo() { if(currentPage==='account') renderAccount(); }
+function updateAccountHeader() {
+  const freeEl = document.getElementById('acc-free-del');
+  const phoneEl = document.getElementById('acc-phone-display');
+  const codeEl = document.getElementById('acc-referral-code');
+  if(freeEl) freeEl.textContent = getFreeDeliveriesLeft();
+  if(phoneEl) phoneEl.textContent = currentUser ? (currentUser.email||currentUser.name||'Sri Vari Member') : 'Sri Vari Member';
+  if(codeEl) codeEl.textContent = currentUser ? (currentUser.referralCode||'------') : '------';
+}
+function copyReferralCode() {
+  if(!currentUser||!currentUser.referralCode) return;
+  navigator.clipboard.writeText(currentUser.referralCode).then(()=>showToast('Code copied! 🎉')).catch(()=>showToast(currentUser.referralCode));
+}
+function saveUserData(uid, data) {
+  // Save to localStorage for instant access
+  localStorage.setItem('scart_user_'+uid, JSON.stringify(data));
+  // Also save to Firebase for cross-device sync
+  if(db) {
+    db.collection('users').doc(uid).set(data, {merge:true}).catch(e=>console.warn('User save:', e));
+  }
+}
+
+function getUserData(uid) {
+  const d = localStorage.getItem('scart_user_'+uid);
+  return d ? JSON.parse(d) : null;
+}
+
+async function loadUserFromFirebase(uid) {
+  if(!db) return null;
+  try {
+    const doc = await db.collection('users').doc(uid).get();
+    if(doc.exists) {
+      const data = doc.data();
+      // Sync Firebase data to localStorage
+      localStorage.setItem('scart_user_'+uid, JSON.stringify(data));
+      localStorage.setItem('scart_last_uid', uid);
+      return data;
+    }
+  } catch(e) { console.warn('User load:', e); }
+  return null;
+}
+function generateReferralCode(uid) {
+  return 'SCT'+uid.slice(-4).toUpperCase()+Math.random().toString(36).slice(2,5).toUpperCase();
+}
+
+function signInWithGoogle() {
+  try {
+    const provider = new firebase.auth.GoogleAuthProvider();
+    firebase.auth().signInWithPopup(provider)
+      .then(async result => {
+        const user = result.user;
+        pendingGoogleUser = user;
+        // Try Firebase first for cross-device sync
+        const firebaseData = await loadUserFromFirebase(user.uid);
+        if(firebaseData) {
+          // Existing user from Firebase — login directly
+          finishLogin(user, null);
+        } else {
+          const localData = getUserData(user.uid);
+          if(localData) {
+            finishLogin(user, null);
+          } else {
+            // Brand new user — show referral step
+            document.getElementById('step-google').style.display = 'none';
+            document.getElementById('step-referral').style.display = 'block';
+          }
+        }
+      })
+      .catch(err => {
+        const errEl = document.getElementById('login-error');
+        if(errEl) { errEl.textContent = '❌ ' + err.message; errEl.style.display = 'block'; }
+      });
+  } catch(e) {
+    const errEl = document.getElementById('login-error');
+    if(errEl) { errEl.textContent = '❌ Google login not configured yet'; errEl.style.display = 'block'; }
+  }
+}
+
+function applyReferralAndFinish() {
+  const code = document.getElementById('referral-input').value.trim().toUpperCase();
+  finishLogin(pendingGoogleUser, code);
+}
+
+function finishLogin(firebaseUser, referralCode) {
+  let userData = getUserData(firebaseUser.uid);
+  let referralMsg = '';
+
+  if(!userData) {
+    userData = {
+      uid: firebaseUser.uid,
+      name: firebaseUser.displayName || '',
+      email: firebaseUser.email || '',
+      photo: firebaseUser.photoURL || '',
+      referralCode: generateReferralCode(firebaseUser.uid),
+      orderCount: 0,
+      freeDeliveries: 2,
+      joinedDate: new Date().toLocaleDateString()
+    };
+
+    // Apply referral if entered
+    if(referralCode && referralCode.length >= 6) {
+      let found = false;
+      for(let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if(key && key.startsWith('scart_user_')) {
+          try {
+            const u = JSON.parse(localStorage.getItem(key));
+            if(u && u.referralCode === referralCode && u.uid !== firebaseUser.uid) {
+              userData.freeDeliveries += 1;
+              found = true;
+              break;
+            }
+          } catch(e) {}
+        }
+      }
+      if(found) {
+        referralMsg = '🎉 Referral applied! +1 free delivery!';
+      } else if(referralCode.length > 0) {
+        const msgEl = document.getElementById('referral-msg');
+        if(msgEl) { msgEl.textContent='❌ Invalid referral code'; msgEl.style.color='var(--red)'; msgEl.style.display='block'; }
+        return;
+      }
+    }
+    saveUserData(firebaseUser.uid, userData);
+  }
+
+  currentUser = userData;
+  localStorage.setItem('scart_last_uid', firebaseUser.uid);
+  document.getElementById('login-modal').style.display = 'none';
+  showToast(referralMsg || `Welcome, ${userData.name||'to Sri Vari'}! 🎉`);
+  updateDeliveryInfo();
+}
+
+// ── ADMIN AUTH ────────────────────────────────────────────────────────────
+const ADMIN_PASSWORD = 'srivari@admin123';
+let adminUnlocked = false;
+let avatarTapCount = 0;
+let avatarTapTimer = null;
+
+function handleAvatarTap() {
+  avatarTapCount++;
+  clearTimeout(avatarTapTimer);
+  avatarTapTimer = setTimeout(()=>{ avatarTapCount=0; }, 800);
+  if(avatarTapCount >= 5) {
+    avatarTapCount = 0;
+    promptAdminLogin();
+  }
+}
+
+function promptAdminLogin() {
+  if(adminUnlocked) { nav('admin'); renderAdminPanel(); return; }
+  const modal = document.getElementById('admin-modal');
+  modal.style.display = 'flex';
+  document.getElementById('admin-pw-input').value = '';
+  document.getElementById('admin-pw-error').style.display = 'none';
+  setTimeout(()=>document.getElementById('admin-pw-input').focus(), 100);
+}
+
+function checkAdminLogin() {
+  const entered = document.getElementById('admin-pw-input').value;
+  if(entered === ADMIN_PASSWORD) {
+    adminUnlocked = true;
+    closeAdminModal();
+    nav('admin');
+    renderAdminPanel();
+  } else {
+    document.getElementById('admin-pw-error').style.display = 'block';
+    document.getElementById('admin-pw-input').value = '';
+    document.getElementById('admin-pw-input').focus();
+  }
+}
+
+function closeAdminModal() {
+  document.getElementById('admin-modal').style.display = 'none';
+}
+
+// ── ADMIN ─────────────────────────────────────────────────────────────────
+function renderAdminPanel() {
+  document.getElementById('adm-count').textContent = PRODUCTS.length;
+  document.getElementById('adm-product-list').innerHTML = PRODUCTS.map(p=>`
+    <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)">
+      ${p.imgUrl
+        ? `<img src="${p.imgUrl}" style="width:44px;height:44px;object-fit:cover;border-radius:8px;flex-shrink:0" onerror="this.outerHTML='<span style=\\'font-size:28px\\'>${p.img}</span>'">`
+        : `<span style="font-size:28px">${p.img}</span>`}
+      <div style="flex:1;min-width:0">
+        <div style="font-weight:700;font-size:13px">${p.name} <span style="font-size:11px;color:var(--muted);font-weight:400">· ${p.brand}</span></div>
+        <div style="font-size:12px;color:var(--muted)">${p.cat} · ₹${p.price}</div>
+      </div>
+      <button onclick="adminEditProduct(${p.id})" style="background:var(--border);border:none;border-radius:6px;padding:5px 10px;font-size:11px;font-weight:700;font-family:inherit;cursor:pointer;color:#374151">Edit</button>
+      <button onclick="adminDeleteProduct(${p.id})" style="background:#fee2e2;border:none;border-radius:6px;padding:5px 10px;font-size:11px;font-weight:700;font-family:inherit;cursor:pointer;color:var(--red)">✕</button>
+    </div>`).join('');
+
+  // Live image preview
+  const imgInput = document.getElementById('adm-imgurl');
+  imgInput.oninput = function() {
+    const url = this.value.trim();
+    const prev = document.getElementById('adm-preview');
+    const img = document.getElementById('adm-img-preview');
+    if(url) { img.src=url; prev.style.display='block'; }
+    else { prev.style.display='none'; }
+  };
+}
+
+function adminAddProduct() {
+  const name   = document.getElementById('adm-name').value.trim();
+  const brand  = document.getElementById('adm-brand').value.trim();
+  const price  = parseFloat(document.getElementById('adm-price').value);
+  const mrp    = parseFloat(document.getElementById('adm-mrp').value) || price;
+  const cat    = document.getElementById('adm-cat').value;
+  const badge  = document.getElementById('adm-badge').value || null;
+  const imgUrl = document.getElementById('adm-imgurl').value.trim() || '';
+  const seller = document.getElementById('adm-seller').value.trim() || 'Sri Vari Seller';
+
+  if(!name || !brand || !price || !cat) { showToast('⚠️ Fill all required fields'); return; }
+
+  const newId = Math.max(...PRODUCTS.map(p=>p.id)) + 1;
+  const newProduct = {id:newId, name, brand, price, mrp, cat, badge, img:'🛍️', imgUrl, rating:4.0, reviews:0, seller, sellerRating:4.5};
+  PRODUCTS.push(newProduct);
+  saveProductToFirebase(newProduct);
+  saveProductsToStorage();
+
+  // Clear form
+  ['adm-name','adm-brand','adm-price','adm-mrp','adm-imgurl','adm-seller'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('adm-cat').value='';
+  document.getElementById('adm-badge').value='';
+  document.getElementById('adm-preview').style.display='none';
+
+  const msg = document.getElementById('adm-msg');
+  msg.textContent=`✅ "${name}" added! Visible in Home & Shop now.`; msg.style.display='block';
+  setTimeout(()=>msg.style.display='none', 3000);
+
+  renderAdminPanel();
+  renderHome();
+  renderListing();
+  showToast(`"${name}" added to store! ✓`);
+}
+
+function adminEditProduct(id) {
+  const p = PRODUCTS.find(x=>x.id===id); if(!p) return;
+  document.getElementById('adm-name').value = p.name;
+  document.getElementById('adm-brand').value = p.brand;
+  document.getElementById('adm-price').value = p.price;
+  document.getElementById('adm-mrp').value = p.mrp;
+  document.getElementById('adm-cat').value = p.cat;
+  document.getElementById('adm-badge').value = p.badge||'';
+  document.getElementById('adm-imgurl').value = p.imgUrl||'';
+  document.getElementById('adm-seller').value = p.seller||'';
+  if(p.imgUrl) {
+    document.getElementById('adm-img-preview').src = p.imgUrl;
+    document.getElementById('adm-preview').style.display='block';
+  }
+  // Change button to Update
+  const btn = document.querySelector('button[onclick="adminAddProduct()"]');
+  if(btn) { btn.textContent='✅ Update Product'; btn.setAttribute('onclick', `adminUpdateProduct(${id})`); }
+  window.scrollTo(0,0);
+  showToast('✏️ Editing "'+p.name+'" — change and click Update');
+}
+
+function adminUpdateProduct(id) {
+  const idx = PRODUCTS.findIndex(x=>x.id===id);
+  if(idx===-1) return;
+  const name   = document.getElementById('adm-name').value.trim();
+  const brand  = document.getElementById('adm-brand').value.trim();
+  const price  = parseFloat(document.getElementById('adm-price').value);
+  const mrp    = parseFloat(document.getElementById('adm-mrp').value) || price;
+  const cat    = document.getElementById('adm-cat').value;
+  const badge  = document.getElementById('adm-badge').value || null;
+  const imgUrl = document.getElementById('adm-imgurl').value.trim() || '';
+  const seller = document.getElementById('adm-seller').value.trim() || 'Sri Vari Seller';
+  if(!name||!brand||!price||!cat){showToast('⚠️ Fill all required fields');return;}
+  // Update in place — keep same ID
+  PRODUCTS[idx] = {...PRODUCTS[idx], name, brand, price, mrp, cat, badge, imgUrl, seller};
+  saveProductToFirebase(PRODUCTS[idx]);
+  saveProductsToStorage();
+  // Clear form
+  ['adm-name','adm-brand','adm-price','adm-mrp','adm-imgurl','adm-seller'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('adm-cat').value='';
+  document.getElementById('adm-badge').value='';
+  document.getElementById('adm-preview').style.display='none';
+  // Reset button back to Add
+  const btn = document.querySelector('button[onclick^="adminUpdateProduct"]');
+  if(btn) { btn.textContent='✅ Add Product'; btn.setAttribute('onclick','adminAddProduct()'); }
+  const msg = document.getElementById('adm-msg');
+  msg.textContent=`✅ "${name}" updated!`; msg.style.display='block';
+  setTimeout(()=>msg.style.display='none',3000);
+  renderAdminPanel();
+  renderHome();
+  renderListing();
+  showToast(`"${name}" updated! ✓`);
+}
+
+function adminDeleteProduct(id) {
+  const idx = PRODUCTS.findIndex(p=>p.id===id);
+  if(idx===-1) return;
+  const name = PRODUCTS[idx].name;
+  PRODUCTS.splice(idx,1);
+  deleteProductFromFirebase(id);
+  saveProductsToStorage();
+  delete cart[id];
+  wishlist.delete(id);
+  updateCartUI();
+  renderAdminPanel();
+  renderHome();
+  renderListing();
+  showToast(`"${name}" removed`);
+}
+
+// ── FIREBASE INIT ─────────────────────────────────────────────────────────
+let db = null;
+try {
+  const firebaseConfig = {
+    apiKey: "AIzaSyBrugZz2SFGLO400Chs8sqpmNLYMZyPlqQ",
+    authDomain: "scart-69b9a.firebaseapp.com",
+    projectId: "scart-69b9a",
+    storageBucket: "scart-69b9a.firebasestorage.app",
+    messagingSenderId: "453109058340",
+    appId: "1:453109058340:web:a02b122e23e55ffe4381b1"
+  };
+  if(!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+  db = firebase.firestore();
+} catch(e) { console.warn('Firebase init:', e); }
+
+// ── FIRESTORE FUNCTIONS ───────────────────────────────────────────────────
+
+// Save order to Firestore
+async function saveOrderToFirebase(order) {
+  try {
+    await db.collection('orders').doc(order.orderId).set({
+      orderId: order.orderId,
+      customerName: customerInfo.name || '',
+      customerPhone: customerInfo.phone || '',
+      loginPhone: currentUser ? currentUser.phone : '',
+      address: (customerInfo.addr1 || '') + (customerInfo.addr2 ? ', '+customerInfo.addr2 : '') + ', ' + (customerInfo.city||'') + ' – ' + (customerInfo.pin||''),
+      items: order.items.map(({p,q}) => ({name:p.name, qty:q, price:p.price, total:p.price*q})),
+      subtotal: order.sub,
+      deliveryFee: order.fee,
+      total: order.tot,
+      slot: order.day + ', ' + order.slot,
+      status: 'Confirmed',
+      placedAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    console.log('Order saved to Firebase ✅');
+  } catch(e) {
+    console.error('Firebase save error:', e);
+  }
+}
+
+// Save customer to Firestore
+async function saveCustomerToFirebase(phone, name) {
+  try {
+    await db.collection('customers').doc(phone).set({
+      phone,
+      name: name || '',
+      lastOrder: firebase.firestore.FieldValue.serverTimestamp()
+    }, { merge: true });
+  } catch(e) {
+    console.error('Customer save error:', e);
+  }
+}
+
+// ── PRODUCT FIREBASE FUNCTIONS ────────────────────────────────────────────
+async function saveProductToFirebase(product) {
+  if(!db) return;
+  try {
+    await db.collection('products').doc(String(product.id)).set(product);
+  } catch(e) { console.error('Product save error:', e); }
+}
+
+async function deleteProductFromFirebase(id) {
+  if(!db) return;
+  try {
+    await db.collection('products').doc(String(id)).delete();
+  } catch(e) { console.error('Product delete error:', e); }
+}
+
+async function loadProductsFromFirebase() {
+  if(!db) return;
+  try {
+    const snap = await db.collection('products').get();
+    PRODUCTS.length = 0;
+    if(!snap.empty) {
+      snap.forEach(doc => PRODUCTS.push(doc.data()));
+    }
+    renderHome();
+    renderListing();
+  } catch(e) { console.error('Load products error:', e); }
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────
+// Instant check — hide/show login modal before Firebase loads
+(function() {
+  const lastUid = localStorage.getItem('scart_last_uid');
+  if(lastUid && getUserData(lastUid)) {
+    // Returning user — hide modal instantly
+    currentUser = getUserData(lastUid);
+    document.getElementById('login-modal').style.display = 'none';
+    updateAccountHeader();
+  } else {
+    // New user — show modal
+    document.getElementById('login-modal').style.display = 'flex';
+  }
+})();
+
+// Firebase auth state — ALWAYS sync from Firebase (source of truth)
+try {
+  firebase.auth().onAuthStateChanged(async function(user) {
+    if(user) {
+      const firebaseData = await loadUserFromFirebase(user.uid);
+      if(firebaseData) {
+        // Firebase is source of truth — always override local
+        currentUser = firebaseData;
+        localStorage.setItem('scart_user_'+user.uid, JSON.stringify(firebaseData));
+        localStorage.setItem('scart_last_uid', user.uid);
+        document.getElementById('login-modal').style.display = 'none';
+        updateAccountHeader();
+      } else {
+        const localData = getUserData(user.uid);
+        if(localData) {
+          currentUser = localData;
+          saveUserData(user.uid, localData); // push to Firebase
+          document.getElementById('login-modal').style.display = 'none';
+          updateAccountHeader();
+        } else {
+          finishLogin(user, null);
+        }
+      }
+    } else {
+      const lastUid = localStorage.getItem('scart_last_uid');
+      if(!lastUid || !getUserData(lastUid)) {
+        document.getElementById('login-modal').style.display = 'flex';
+      }
+    }
+  });
+} catch(e) { console.warn('Auth error:', e); }
+document.getElementById('hero-search').addEventListener('input', function() {
+  searchQ = this.value.trim();
+  if(searchQ.length > 0) { selectedCat='All'; nav('listing'); }
+});
+document.getElementById('hero-search').addEventListener('keydown',e=>{if(e.key==='Enter')doSearch();});
+renderHome();
+loadProductsFromFirebase();
+// Clear any old fake/hardcoded address data from previous versions
+try { ['home','work','other','default'].forEach(k=>{ const old='scart_addr_'+k; if(localStorage.getItem(old))localStorage.removeItem(old); }); } catch(e){}
+
+// ── ADDRESS MANAGEMENT ───────────────────────────────────────────────────
+function getAddrKey() {
+  const uid = currentUser ? (currentUser.uid || currentUser.phone || 'guest') : 'guest';
+  return 'scart_addrs_' + uid;
+}
+function saveAddress() {
+  const line1 = (document.getElementById('addr-line1')||{}).value?.trim();
+  const line2 = (document.getElementById('addr-line2')||{}).value?.trim();
+  const city  = (document.getElementById('addr-city')||{}).value?.trim();
+  const pin   = (document.getElementById('addr-pin')||{}).value?.trim();
+  const type  = (document.getElementById('addr-type')||{}).value;
+  const err   = document.getElementById('addr-err');
+  if(!line1 || !city || !pin) {
+    if(err){err.style.display='block';err.textContent='Please fill in all required fields.';}
+    return;
+  }
+  if(!/^\d{6}$/.test(pin)) {
+    if(err){err.style.display='block';err.textContent='Enter a valid 6-digit PIN code.';}
+    return;
+  }
+  const addrs = JSON.parse(localStorage.getItem(getAddrKey()) || '[]');
+  addrs.push({type, line1, line2, city, pin});
+  localStorage.setItem(getAddrKey(), JSON.stringify(addrs));
+  showToast('Address saved ✅');
+  accTab='addresses';
+  renderAccount();
+  setTimeout(()=>{ document.querySelectorAll('.acc-tab').forEach(b=>{ b.classList.toggle('active', b.getAttribute('onclick')||'' .includes('addresses')); }); },10);
+}
+function deleteAddress(idx) {
+  if(!confirm('Remove this address?')) return;
+  const addrs = JSON.parse(localStorage.getItem(getAddrKey()) || '[]');
+  addrs.splice(idx, 1);
+  localStorage.setItem(getAddrKey(), JSON.stringify(addrs));
+  showToast('Address removed');
+  accTab='addresses';
+  renderAccount();
+  setTimeout(()=>{ document.querySelectorAll('.acc-tab').forEach(b=>{ b.classList.toggle('active', b.getAttribute('onclick')||'' .includes('addresses')); }); },10);
+}
+
+// ── AI CHATBOT (Smart Rule-Based) ─────────────────────────────────────────
+let aiTyping = false;
+
+function initAIChat() {}
+
+function addMsg(role, text) {
+  const list = document.getElementById('ai-msg-list');
+  if (!list) return;
+  const now = new Date().toLocaleTimeString('en-IN', {hour:'2-digit', minute:'2-digit'});
+  const div = document.createElement('div');
+  div.className = 'msg-bubble ' + (role === 'user' ? 'msg-user' : 'msg-bot');
+  div.innerHTML = text + '<span class="msg-time">' + now + '</span>';
+  list.appendChild(div);
+  list.scrollTop = list.scrollHeight;
+}
+
+function showTyping() {
+  const list = document.getElementById('ai-msg-list');
+  if (!list) return;
+  const el = document.createElement('div');
+  el.className = 'typing-indicator'; el.id = 'ai-typing';
+  el.innerHTML = '<span></span><span></span><span></span>';
+  list.appendChild(el); list.scrollTop = list.scrollHeight;
+}
+function removeTyping() { const el=document.getElementById('ai-typing'); if(el)el.remove(); }
+
+// ── Knowledge base ──
+const SRIVARI_KB = [
+  { keys:['track','order','status','where is my','kahan','mera order','sct'], reply:`Your order ID starts with <b>SCT</b>. Go to <b>Account → Orders</b> to see live status of all your orders. If it's been more than 24 hrs, let me know!` },
+  { keys:['deliver','timing','slot','time','kab aayega','kitne baje','when'], reply:`We deliver <b>same day between 7–9 PM</b> if you order before 6 PM. Orders placed after 6 PM are delivered the <b>next day</b> in the same slot.` },
+  { keys:['delivery charge','delivery fee','free delivery','shipping','charge'], reply:`Delivery is <b>FREE for your first 2 orders</b>! After that it's just ₹10. Orders above ₹300 always get free delivery.` },
+  { keys:['return','refund','replace','damaged','broken','wrong item','galat'], reply:`If you receive a damaged, wrong, or missing item, <b>contact us within 24 hours</b> of delivery. Go to Account → Orders, tap the order, and raise a return request.` },
+  { keys:['payment','pay','upi','card','wallet','gpay','phonepe','paytm','cash','cod'], reply:`We accept <b>UPI, Credit/Debit Cards, Wallets</b> (PhonePe, GPay, Paytm) and <b>Cash on Delivery (COD)</b>. All online payments are 100% secure via Razorpay.` },
+  { keys:['referral','refer','code','invite','bonus','friend'], reply:`Share your referral code from <b>Account → Referral</b>. Every friend who joins gives you <b>1 extra free delivery</b>! There's no limit on referrals.` },
+  { keys:['cancel','cancellation','cancel order'], reply:`You can cancel an order <b>before it is picked up</b> (usually within 30 mins of placing). Go to Account → Orders → tap your order → Cancel. Refunds are processed in 2–3 business days.` },
+  { keys:['product','quality','authentic','original','fake','genuine'], reply:`All products on Sri Vari are <b>100% authentic</b> and sourced directly from verified suppliers. We do not sell expired or duplicate goods.` },
+  { keys:['minimum','min order','minimum order'], reply:`There is <b>no minimum order value</b> on Sri Vari. You can order even a single item!` },
+  { keys:['account','login','sign in','signup','register','otp'], reply:`You can log in using your <b>mobile number (OTP)</b> or <b>Google account</b>. If you face any login issues, try clearing the browser cache or switching networks.` },
+  { keys:['address','location','pincode','area','deliver here','serviceable'], reply:`You can save multiple delivery addresses under <b>Account → Addresses</b>. If your area is not serviceable yet, we are expanding soon — stay tuned!` },
+  { keys:['offer','discount','coupon','promo','sale','deal'], reply:`Check the <b>Home page and Shop tab</b> for active offers. First-time users get extra-free delivery. Referrals also unlock free deliveries!` },
+  { keys:['contact','support','help','problem','issue','complaint'], reply:`You are already in the right place! Type your question and I will help instantly. For urgent issues, you can also reach us at <b>support@srivari.co.in</b>.` },
+  { keys:['hi','hello','hey','hii','namaste','namaskar','helo'], reply:`Hello! 👋 Welcome to Sri Vari Support. I can help you with orders, delivery, returns, payments, and more. What do you need help with?` },
+  { keys:['thanks','thank you','ok','okay','great','nice','done','got it'], reply:`You're welcome! Is there anything else I can help you with? 😊` },
+  { keys:['product not available','out of stock','nahi hai','stock'], reply:`If a product shows <b>Out of Stock</b>, it means we have temporarily run out. Check back in a few hours — we restock daily!` },
+  { keys:['grocery','dal','rice','atta','oil','sabzi','vegetable','fruit'], reply:`We stock a wide range of <b>groceries</b> — staples, oils, spices, dairy, beverages, and more. Browse the Shop tab by category to find what you need.` },
+];
+
+function getBotReply(msg) {
+  const q = msg.toLowerCase();
+  for (const entry of SRIVARI_KB) {
+    if (entry.keys.some(k => q.includes(k))) return entry.reply;
+  }
+  return `I am not sure about that, but I am here to help! You can ask me about <b>orders, delivery timings, returns, payments, referrals</b>, or anything else about Sri Vari. 😊`;
+}
+
+function sendChip(btn, text) {
+  const chips = document.getElementById('ai-chips');
+  if (chips) chips.style.display = 'none';
+  const input = document.getElementById('ai-input');
+  if (input) input.value = text;
+  sendAIMessage();
+}
+
+function sendAIMessage() {
+  const input = document.getElementById('ai-input');
+  const sendBtn = document.getElementById('ai-send-btn');
+  if (!input || aiTyping) return;
+  const text = input.value.trim();
+  if (!text) return;
+  input.value = '';
+  addMsg('user', text);
+  const chips = document.getElementById('ai-chips');
+  if (chips) chips.style.display = 'none';
+  aiTyping = true;
+  if (sendBtn) sendBtn.disabled = true;
+  showTyping();
+  setTimeout(() => {
+    removeTyping();
+    addMsg('bot', getBotReply(text));
+    aiTyping = false;
+    if (sendBtn) sendBtn.disabled = false;
+    if (input) input.focus();
+  }, 700 + Math.random()*400);
+}
+
+// ── SERVICE WORKER (PWA) ──────────────────────────────────────────────────
+if('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js')
+    .then(() => console.log('Service Worker registered ✅'))
+    .catch(e => console.warn('SW registration failed:', e));
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// ── DELIVERY PARTNER SYSTEM ──────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════════════════
+
+let currentDP = null;  // logged-in delivery partner
+let dpTab = 'orders';
+let dpPartners = []; // cached from Firestore
+let dpIsOnline = false;
+
+// ── OPEN / CLOSE DP LOGIN ─────────────────────────────────────────────────
+function openDPLogin() {
+  document.getElementById('dp-login-modal').style.display = 'flex';
+  document.getElementById('login-modal').style.display = 'none';
+}
+function closeDPLogin() {
+  document.getElementById('dp-login-modal').style.display = 'none';
+  document.getElementById('login-modal').style.display = 'flex';
+  document.getElementById('dp-login-error').style.display = 'none';
+  document.getElementById('dp-id-input').value = '';
+  document.getElementById('dp-pw-input').value = '';
+}
+
+// ── DELIVERY PARTNER LOGIN ────────────────────────────────────────────────
+async function loginDeliveryPartner() {
+  const rawId = document.getElementById('dp-id-input').value.trim().toUpperCase();
+  const pw = document.getElementById('dp-pw-input').value.trim();
+  const errEl = document.getElementById('dp-login-error');
+  errEl.style.display = 'none';
+
+  if (!rawId || !pw) {
+    errEl.textContent = '⚠️ Enter your Delivery ID and Password';
+    errEl.style.display = 'block'; return;
+  }
+
+  // Try Firebase first
+  try {
+    if (db) {
+      const snap = await db.collection('deliveryPartners').doc(rawId).get();
+      if (snap.exists) {
+        const data = snap.data();
+        if (!data.approved) {
+          errEl.textContent = '⏳ Your account is pending admin approval';
+          errEl.style.display = 'block'; return;
+        }
+        if (data.password !== pw) {
+          errEl.textContent = '❌ Incorrect password. Try again.';
+          errEl.style.display = 'block'; return;
+        }
+        currentDP = { ...data, deliveryId: rawId };
+        openDPDashboard(); return;
+      }
+    }
+  } catch(e) { console.warn('DP Firebase login error:', e); }
+
+  // Fallback: check demo accounts in localStorage
+  const stored = JSON.parse(localStorage.getItem('scart_dp_accounts') || '{}');
+  if (stored[rawId]) {
+    const acc = stored[rawId];
+    if (!acc.approved) {
+      errEl.textContent = '⏳ Your account is pending admin approval';
+      errEl.style.display = 'block'; return;
+    }
+    if (acc.password !== pw) {
+      errEl.textContent = '❌ Incorrect password. Try again.';
+      errEl.style.display = 'block'; return;
+    }
+    currentDP = { ...acc, deliveryId: rawId };
+    openDPDashboard(); return;
+  }
+
+  errEl.textContent = '❌ Delivery ID not found. Contact admin.';
+  errEl.style.display = 'block';
+}
+
+// ── OPEN DASHBOARD ────────────────────────────────────────────────────────
+function openDPDashboard() {
+  document.getElementById('dp-login-modal').style.display = 'none';
+  document.getElementById('dp-dashboard').style.display = 'block';
+  document.getElementById('dp-bottom-nav').style.display = 'flex';
+  document.getElementById('dp-topbar-id').textContent = currentDP.deliveryId;
+  dpIsOnline = currentDP.status === 'online';
+  dpTab = 'orders';
+  dpSetTab('orders', document.getElementById('dp-nav-orders'));
+}
+
+function logoutDeliveryPartner() {
+  if (!confirm('Sign out of rider account?')) return;
+  // Set offline in Firebase
+  if (db && currentDP) {
+    db.collection('deliveryPartners').doc(currentDP.deliveryId)
+      .update({ status: 'offline', available: false }).catch(()=>{});
+  }
+  currentDP = null; dpIsOnline = false;
+  document.getElementById('dp-dashboard').style.display = 'none';
+  document.getElementById('dp-bottom-nav').style.display = 'none';
+  document.getElementById('login-modal').style.display = 'flex';
+}
+
+// ── TAB NAVIGATION ────────────────────────────────────────────────────────
+function dpSetTab(tab, el) {
+  dpTab = tab;
+  document.querySelectorAll('.dp-tab').forEach(b => b.classList.remove('active'));
+  if (el) el.classList.add('active');
+  renderDPContent();
+}
+
+function renderDPContent() {
+  const c = document.getElementById('dp-main-content');
+  if (dpTab === 'orders') c.innerHTML = renderDPOrders();
+  else if (dpTab === 'earnings') c.innerHTML = renderDPEarnings();
+  else if (dpTab === 'history') c.innerHTML = renderDPHistory();
+  else if (dpTab === 'profile') c.innerHTML = renderDPProfile();
+  // Attach toggle listener after render
+  const tog = document.getElementById('dp-online-toggle');
+  if (tog) {
+    tog.checked = dpIsOnline;
+    tog.addEventListener('change', function() {
+      dpIsOnline = this.checked;
+      updateDPOnlineStatus(dpIsOnline);
+      document.querySelector('.dp-status-text').textContent = dpIsOnline ? '🟢 Online' : '⚫ Offline';
+      document.querySelector('.dp-status-text').className = 'dp-status-text ' + (dpIsOnline ? 'online' : 'offline');
+    });
+  }
+}
+
+async function updateDPOnlineStatus(online) {
+  if (!db || !currentDP) return;
+  try {
+    await db.collection('deliveryPartners').doc(currentDP.deliveryId)
+      .update({ status: online ? 'online' : 'offline', available: online });
+    showToast(online ? '🟢 You are now Online' : '⚫ You are Offline');
+  } catch(e) { showToast(online ? '🟢 Online' : '⚫ Offline'); }
+}
+
+// ── DP ORDERS TAB ─────────────────────────────────────────────────────────
+function renderDPOrders() {
+  const myOrders = getDPMyOrders();
+  const active = myOrders.filter(o => o.status !== 'Delivered' && o.status !== 'Cancelled');
+
+  return `
+    <!-- Online Toggle -->
+    <div class="dp-toggle-card">
+      <div class="dp-status-info">
+        <div class="dp-status-label">Your Status</div>
+        <div class="dp-status-text ${dpIsOnline?'online':'offline'}">${dpIsOnline?'🟢 Online':'⚫ Offline'}</div>
+      </div>
+      <div class="dp-toggle-wrap">
+        <input type="checkbox" class="dp-toggle-input" id="dp-online-toggle" ${dpIsOnline?'checked':''}>
+        <label class="dp-toggle-label" for="dp-online-toggle"></label>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="dp-stats-row">
+      <div class="dp-stat-card">
+        <div class="dp-stat-icon">📦</div>
+        <div class="dp-stat-val">${active.length}</div>
+        <div class="dp-stat-lbl">Active</div>
+      </div>
+      <div class="dp-stat-card">
+        <div class="dp-stat-icon">✅</div>
+        <div class="dp-stat-val">${myOrders.filter(o=>o.status==='Delivered').length}</div>
+        <div class="dp-stat-lbl">Delivered</div>
+      </div>
+      <div class="dp-stat-card">
+        <div class="dp-stat-icon">💰</div>
+        <div class="dp-stat-val">₹${myOrders.filter(o=>o.status==='Delivered').length * 30}</div>
+        <div class="dp-stat-lbl">Today</div>
+      </div>
+    </div>
+
+    <div style="font-size:13px;font-weight:700;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.6px;margin-bottom:12px">Active Orders</div>
+    ${active.length === 0
+      ? `<div style="text-align:center;padding:40px 20px;color:rgba(255,255,255,.3)">
+           <div style="font-size:48px;margin-bottom:12px">📭</div>
+           <div style="font-size:15px;font-weight:600">${dpIsOnline ? 'No active orders. Waiting for assignment…' : 'Go online to receive orders'}</div>
+         </div>`
+      : active.map(o => dpOrderCard(o)).join('')}
+  `;
+}
+
+function dpOrderCard(o) {
+  const isAssigned = o.dpStatus === 'assigned' || o.status === 'Out for Delivery';
+  const isPicked = o.dpStatus === 'picked';
+  let actionBtn = '';
+  if (!o.dpStatus || o.dpStatus === 'assigned') {
+    actionBtn = `<button class="dp-btn-sm dp-btn-pickup" onclick="dpMarkPickedUp('${o.orderId}')">📦 Picked Up</button>`;
+  } else if (o.dpStatus === 'picked') {
+    actionBtn = `<button class="dp-btn-sm dp-btn-deliver" onclick="dpMarkDelivered('${o.orderId}')">✅ Delivered</button>`;
+  }
+  const statusClass = o.dpStatus === 'picked' ? 'status-picked' : 'status-assigned';
+  const statusLabel = o.dpStatus === 'picked' ? '🚴 En Route' : '📋 Assigned';
+
+  return `
+    <div class="dp-order-card ${o.dpStatus === 'assigned' || !o.dpStatus ? 'urgent' : ''}">
+      <div class="dp-order-header">
+        <div>
+          <div class="dp-order-id">${o.orderId}</div>
+          <div class="dp-order-time">${o.placedAt ? new Date(o.placedAt.seconds*1000).toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'}) : 'Just now'}</div>
+        </div>
+        <span class="dp-order-status ${statusClass}">${statusLabel}</span>
+      </div>
+      <div class="dp-order-addr">📍 ${o.address || 'Address not available'}</div>
+      <div style="font-size:13px;color:rgba(255,255,255,.5);margin-bottom:12px">📞 ${o.customerPhone || '—'} · ${o.customerName || 'Customer'}</div>
+      <div class="dp-order-footer">
+        <div>
+          <div class="dp-order-amount">₹${o.total}</div>
+          <div class="dp-order-items">${(o.items||[]).length} item${(o.items||[]).length!==1?'s':''}</div>
+        </div>
+        <div class="dp-action-btns">${actionBtn}</div>
+      </div>
+    </div>`;
+}
+
+async function dpMarkPickedUp(orderId) {
+  await dpUpdateOrderStatus(orderId, 'picked', 'Out for Delivery');
+  showToast('📦 Marked as Picked Up');
+  renderDPContent();
+}
+
+async function dpMarkDelivered(orderId) {
+  await dpUpdateOrderStatus(orderId, 'delivered', 'Delivered');
+  showToast('✅ Order Delivered!');
+  renderDPContent();
+}
+
+async function dpUpdateOrderStatus(orderId, dpStatus, orderStatus) {
+  // Update in local mock
+  const stored = JSON.parse(localStorage.getItem('scart_dp_mock_orders') || '[]');
+  const idx = stored.findIndex(o => o.orderId === orderId);
+  if (idx !== -1) {
+    stored[idx].dpStatus = dpStatus;
+    stored[idx].status = orderStatus;
+    localStorage.setItem('scart_dp_mock_orders', JSON.stringify(stored));
+  }
+  // Update Firebase
+  if (db) {
+    try {
+      await db.collection('orders').doc(orderId).update({
+        dpStatus, status: orderStatus,
+        assignedTo: currentDP.deliveryId,
+        [`${dpStatus}At`]: firebase.firestore.FieldValue.serverTimestamp()
+      });
+    } catch(e) { console.warn('Order status update:', e); }
+  }
+}
+
+// ── DP EARNINGS TAB ───────────────────────────────────────────────────────
+function renderDPEarnings() {
+  const myOrders = getDPMyOrders().filter(o => o.status === 'Delivered');
+  const todayEarnings = myOrders.length * 30;
+  const weekEarnings = myOrders.length * 30 + 90; // mock
+  const totalDeliveries = myOrders.length;
+
+  return `
+    <div class="dp-earn-card">
+      <div class="dp-earn-amount">₹${todayEarnings}</div>
+      <div class="dp-earn-label">Today's Earnings</div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px">
+      <div class="dp-stat-card">
+        <div class="dp-stat-icon">📅</div>
+        <div class="dp-stat-val">₹${weekEarnings}</div>
+        <div class="dp-stat-lbl">This Week</div>
+      </div>
+      <div class="dp-stat-card">
+        <div class="dp-stat-icon">🚴</div>
+        <div class="dp-stat-val">${totalDeliveries}</div>
+        <div class="dp-stat-lbl">Total Delivered</div>
+      </div>
+    </div>
+    <div style="font-size:13px;font-weight:700;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.6px;margin-bottom:12px">Earning Breakdown</div>
+    <div class="dp-earn-row"><span class="dp-earn-desc">Per delivery</span><span class="dp-earn-val">₹30</span></div>
+    <div class="dp-earn-row"><span class="dp-earn-desc">Deliveries today</span><span class="dp-earn-val">${totalDeliveries}</span></div>
+    <div class="dp-earn-row"><span class="dp-earn-desc">Bonus (5+ deliveries)</span><span class="dp-earn-val">${totalDeliveries>=5?'₹50':'Unlock at 5'}</span></div>
+    <div class="dp-earn-row" style="border:1px solid rgba(249,115,22,.3)">
+      <span style="font-weight:700;color:#fff">Today Total</span>
+      <span style="font-weight:800;font-size:16px;color:#f97316">₹${todayEarnings + (totalDeliveries>=5?50:0)}</span>
+    </div>
+  `;
+}
+
+// ── DP HISTORY TAB ────────────────────────────────────────────────────────
+function renderDPHistory() {
+  const delivered = getDPMyOrders().filter(o => o.status === 'Delivered');
+  return `
+    <div style="font-size:13px;font-weight:700;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.6px;margin-bottom:12px">Delivery History (${delivered.length})</div>
+    ${delivered.length === 0
+      ? `<div style="text-align:center;padding:40px;color:rgba(255,255,255,.3)"><div style="font-size:40px;margin-bottom:10px">📭</div>No deliveries yet</div>`
+      : delivered.map(o=>`
+        <div class="dp-order-card">
+          <div class="dp-order-header">
+            <div><div class="dp-order-id">${o.orderId}</div><div class="dp-order-time">${o.customerName||'Customer'}</div></div>
+            <span class="dp-order-status status-delivered">✅ Delivered</span>
+          </div>
+          <div class="dp-order-addr">📍 ${o.address||'—'}</div>
+          <div class="dp-order-footer">
+            <div><div class="dp-order-amount">₹${o.total}</div><div class="dp-order-items">${(o.items||[]).length} items</div></div>
+            <span style="color:#22c55e;font-weight:700;font-size:14px">+₹30</span>
+          </div>
+        </div>`).join('')}
+  `;
+}
+
+// ── DP PROFILE TAB ────────────────────────────────────────────────────────
+function renderDPProfile() {
+  const dp = currentDP || {};
+  const myOrders = getDPMyOrders();
+  return `
+    <div class="dp-profile-header">
+      <div class="dp-avatar">🧑‍💼</div>
+      <div class="dp-profile-name">${dp.name || 'Delivery Partner'}</div>
+      <div class="dp-profile-id">${dp.deliveryId}</div>
+      <div style="display:inline-flex;align-items:center;gap:6px;background:rgba(34,197,94,.12);border:1px solid rgba(34,197,94,.25);border-radius:20px;padding:4px 14px;font-size:12px;color:#22c55e;font-weight:700">
+        <span style="width:8px;height:8px;background:#22c55e;border-radius:50%;box-shadow:0 0 6px #22c55e"></span>
+        Approved Partner
+      </div>
+    </div>
+    <div class="dp-profile-row"><span class="dp-profile-key">Delivery ID</span><span class="dp-profile-val">${dp.deliveryId}</span></div>
+    <div class="dp-profile-row"><span class="dp-profile-key">Phone</span><span class="dp-profile-val">${dp.phone||'—'}</span></div>
+    <div class="dp-profile-row"><span class="dp-profile-key">Total Deliveries</span><span class="dp-profile-val">${myOrders.filter(o=>o.status==='Delivered').length}</span></div>
+    <div class="dp-profile-row"><span class="dp-profile-key">Current Status</span><span class="dp-profile-val" style="color:${dpIsOnline?'#22c55e':'#9ca3af'}">${dpIsOnline?'🟢 Online':'⚫ Offline'}</span></div>
+    <div class="dp-profile-row"><span class="dp-profile-key">Account Status</span><span class="dp-profile-val" style="color:#22c55e">✅ Approved</span></div>
+    <button onclick="logoutDeliveryPartner()" style="width:100%;background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.25);border-radius:12px;padding:13px;color:#f87171;font-weight:700;font-size:14px;cursor:pointer;font-family:inherit;margin-top:16px;transition:.2s" onmouseover="this.style.background='rgba(239,68,68,.25)'" onmouseout="this.style.background='rgba(239,68,68,.12)'">Sign Out</button>
+  `;
+}
+
+// ── HELPER: get this DP's orders ──────────────────────────────────────────
+function getDPMyOrders() {
+  if (!currentDP) return [];
+  const all = JSON.parse(localStorage.getItem('scart_dp_mock_orders') || '[]');
+  // Also try to pull from Firebase orders (async), for now use localStorage mock
+  return all.filter(o => o.assignedTo === currentDP.deliveryId);
+}
+
+// ── ADMIN: CREATE DELIVERY PARTNER ────────────────────────────────────────
+function openCreatePartnerModal() {
+  document.getElementById('create-partner-modal').style.display = 'flex';
+  document.getElementById('cp-msg').style.display = 'none';
+}
+
+async function createDeliveryPartner() {
+  const name = document.getElementById('cp-name').value.trim();
+  const phone = document.getElementById('cp-phone').value.trim();
+  const pw = document.getElementById('cp-pw').value.trim();
+  const msgEl = document.getElementById('cp-msg');
+
+  if (!name || !phone || !pw) {
+    msgEl.style.cssText = 'display:block;color:#f87171';
+    msgEl.textContent = '⚠️ Fill all fields'; return;
+  }
+
+  // Generate next Delivery ID
+  const stored = JSON.parse(localStorage.getItem('scart_dp_accounts') || '{}');
+  let maxNum = 0;
+  Object.keys(stored).forEach(id => {
+    const n = parseInt(id.replace('SRI VARI',''));
+    if (!isNaN(n) && n > maxNum) maxNum = n;
+  });
+
+  // Also check Firebase for max
+  if (db) {
+    try {
+      const snap = await db.collection('deliveryPartners').get();
+      snap.forEach(doc => {
+        const n = parseInt(doc.id.replace('SRI VARI',''));
+        if (!isNaN(n) && n > maxNum) maxNum = n;
+      });
+    } catch(e) {}
+  }
+
+  const newId = 'SRI VARI' + String(maxNum + 1).padStart(3, '0');
+  const partner = {
+    deliveryId: newId, name, phone,
+    password: pw, approved: true,
+    available: false, status: 'offline',
+    createdAt: new Date().toISOString()
+  };
+
+  // Save to localStorage
+  stored[newId] = partner;
+  localStorage.setItem('scart_dp_accounts', JSON.stringify(stored));
+
+  // Save to Firebase
+  if (db) {
+    try {
+      await db.collection('deliveryPartners').doc(newId).set(partner);
+    } catch(e) { console.warn('DP Firebase save:', e); }
+  }
+
+  msgEl.style.cssText = 'display:block;color:#22c55e';
+  msgEl.textContent = `✅ Created: ${newId} — ${name}`;
+  document.getElementById('cp-name').value = '';
+  document.getElementById('cp-phone').value = '';
+  document.getElementById('cp-pw').value = '';
+  setTimeout(() => {
+    document.getElementById('create-partner-modal').style.display = 'none';
+    renderAdminDPPanel();
+  }, 1500);
+}
+
+// ── ADMIN: RENDER DELIVERY PARTNER PANEL ─────────────────────────────────
+async function renderAdminDPPanel() {
+  // Load partners
+  const stored = JSON.parse(localStorage.getItem('scart_dp_accounts') || '{}');
+  dpPartners = Object.values(stored);
+
+  if (db) {
+    try {
+      const snap = await db.collection('deliveryPartners').get();
+      dpPartners = [];
+      snap.forEach(doc => dpPartners.push({ ...doc.data(), deliveryId: doc.id }));
+      // Merge with local if Firebase empty
+      if (dpPartners.length === 0) dpPartners = Object.values(stored);
+    } catch(e) {}
+  }
+
+  const online = dpPartners.filter(p => p.status === 'online').length;
+  const approved = dpPartners.filter(p => p.approved).length;
+
+  // Stats
+  const statsEl = document.getElementById('adm-dp-stats');
+  if (statsEl) statsEl.innerHTML = `
+    <div style="background:#ecfdf5;border:1px solid #6ee7b7;border-radius:12px;padding:14px;text-align:center">
+      <div style="font-size:22px;font-weight:800;color:#059669">${online}</div>
+      <div style="font-size:11px;color:#9ca3af;margin-top:2px">Online Now</div>
+    </div>
+    <div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:12px;padding:14px;text-align:center">
+      <div style="font-size:22px;font-weight:800;color:#c2410c">${dpPartners.length}</div>
+      <div style="font-size:11px;color:#9ca3af;margin-top:2px">Total Partners</div>
+    </div>
+    <div style="background:#fef3c7;border:1px solid #fde68a;border-radius:12px;padding:14px;text-align:center">
+      <div style="font-size:22px;font-weight:800;color:#d97706">${dpPartners.length - approved}</div>
+      <div style="font-size:11px;color:#9ca3af;margin-top:2px">Pending</div>
+    </div>`;
+
+  // Partners list
+  const listEl = document.getElementById('adm-dp-list');
+  if (listEl) {
+    if (dpPartners.length === 0) {
+      listEl.innerHTML = `<div style="text-align:center;color:var(--muted);padding:20px;font-size:13px">No delivery partners yet. Create one above.</div>`;
+    } else {
+      listEl.innerHTML = dpPartners.map(p => `
+        <div class="adm-dp-card">
+          <div style="display:flex;align-items:center;gap:10px;flex:1">
+            <div class="adm-status-dot" style="background:${p.status==='online'?'#059669':'#d1d5db'};box-shadow:${p.status==='online'?'0 0 6px #059669':'none'}"></div>
+            <div>
+              <div class="adm-dp-id">${p.deliveryId}</div>
+              <div class="adm-dp-meta">${p.name||'—'} · ${p.phone||'—'}</div>
+              <div style="font-size:11px;margin-top:3px">
+                <span style="color:${p.approved?'#059669':'#d97706'}">${p.approved?'✅ Approved':'⏳ Pending'}</span>
+                <span style="color:#e5e7eb;margin:0 6px">·</span>
+                <span style="color:${p.status==='online'?'#059669':'#9ca3af'}">${p.status==='online'?'🟢 Online':'⚫ Offline'}</span>
+              </div>
+            </div>
+          </div>
+          <div class="adm-dp-btns">
+            ${!p.approved ? `<button onclick="adminApproveDp('${p.deliveryId}')" style="background:#ecfdf5;border:1px solid #6ee7b7;border-radius:8px;padding:6px 12px;color:#059669;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit">Approve</button>` : ''}
+            <button onclick="adminAssignOrder('${p.deliveryId}')" style="background:#fff7ed;border:1px solid #fed7aa;border-radius:8px;padding:6px 12px;color:#c2410c;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit">Assign Order</button>
+            <button onclick="adminDeleteDp('${p.deliveryId}')" style="background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:6px 12px;color:#ef4444;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit">Remove</button>
+          </div>
+        </div>`).join('');
+    }
+  }
+
+  // Unassigned orders
+  renderAdminUnassignedOrders();
+}
+
+function renderAdminUnassignedOrders() {
+  const unassignedEl = document.getElementById('adm-unassigned-orders');
+  if (!unassignedEl) return;
+  const allOrders = JSON.parse(localStorage.getItem('scart_dp_mock_orders') || '[]');
+  const unassigned = allOrders.filter(o => !o.assignedTo && o.status !== 'Delivered');
+
+  if (unassigned.length === 0) {
+    unassignedEl.innerHTML = `<div style="text-align:center;color:var(--muted);padding:16px;font-size:13px">No unassigned orders</div>`;
+    return;
+  }
+  unassignedEl.innerHTML = unassigned.map(o => `
+    <div style="background:#f8fafc;border:1px solid #fed7aa;border-radius:12px;padding:14px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+      <div>
+        <div style="font-weight:700;color:#c2410c;font-size:13px">${o.orderId}</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:2px">${o.customerName||'Customer'} · ₹${o.total}</div>
+        <div style="font-size:11px;color:#9ca3af;margin-top:2px">📍 ${(o.address||'').substring(0,40)}…</div>
+      </div>
+      <button onclick="openAssignModal('${o.orderId}')" style="background:linear-gradient(135deg,#c2410c,#f97316);border:none;border-radius:8px;padding:8px 14px;color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">Assign →</button>
+    </div>`).join('');
+}
+
+function adminApproveDp(deliveryId) {
+  const stored = JSON.parse(localStorage.getItem('scart_dp_accounts') || '{}');
+  if (stored[deliveryId]) { stored[deliveryId].approved = true; localStorage.setItem('scart_dp_accounts', JSON.stringify(stored)); }
+  if (db) db.collection('deliveryPartners').doc(deliveryId).update({ approved: true }).catch(()=>{});
+  showToast(`✅ ${deliveryId} approved`);
+  renderAdminDPPanel();
+}
+
+function adminDeleteDp(deliveryId) {
+  if (!confirm(`Remove ${deliveryId}?`)) return;
+  const stored = JSON.parse(localStorage.getItem('scart_dp_accounts') || '{}');
+  delete stored[deliveryId];
+  localStorage.setItem('scart_dp_accounts', JSON.stringify(stored));
+  if (db) db.collection('deliveryPartners').doc(deliveryId).delete().catch(()=>{});
+  showToast(`${deliveryId} removed`);
+  renderAdminDPPanel();
+}
+
+function openAssignModal(orderId) {
+  document.getElementById('assign-order-label').textContent = 'Order ' + orderId;
+  const listEl = document.getElementById('assign-partners-list');
+  const available = dpPartners.filter(p => p.approved);
+  if (available.length === 0) {
+    listEl.innerHTML = '<div style="color:rgba(255,255,255,.4);text-align:center;padding:20px">No approved partners available</div>';
+  } else {
+    listEl.innerHTML = available.map(p => `
+      <button onclick="assignOrderToPartner('${orderId}','${p.deliveryId}')" style="width:100%;background:#f8fafc;border:1.5px solid #e8edf5;border-radius:12px;padding:14px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;font-family:inherit;margin-bottom:8px;transition:.2s" onmouseover="this.style.background='#fff7ed';this.style.borderColor='#fed7aa'" onmouseout="this.style.background='#f8fafc';this.style.borderColor='#e8edf5'">
+        <div style="text-align:left">
+          <div style="font-weight:700;color:#c2410c;font-size:14px">${p.deliveryId}</div>
+          <div style="font-size:12px;color:#6b7280;margin-top:2px">${p.name||'—'}</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;font-size:12px;color:${p.status==='online'?'#059669':'#9ca3af'}">
+          <span style="width:8px;height:8px;background:${p.status==='online'?'#059669':'#d1d5db'};border-radius:50%"></span>
+          ${p.status==='online'?'Online':'Offline'}
+        </div>
+      </button>`).join('');
+  }
+  document.getElementById('assign-modal').style.display = 'flex';
+}
+
+function closeAssignModal() {
+  document.getElementById('assign-modal').style.display = 'none';
+}
+
+function assignOrderToPartner(orderId, deliveryId) {
+  const allOrders = JSON.parse(localStorage.getItem('scart_dp_mock_orders') || '[]');
+  const idx = allOrders.findIndex(o => o.orderId === orderId);
+  if (idx !== -1) {
+    allOrders[idx].assignedTo = deliveryId;
+    allOrders[idx].dpStatus = 'assigned';
+    allOrders[idx].status = 'Out for Delivery';
+  }
+  localStorage.setItem('scart_dp_mock_orders', JSON.stringify(allOrders));
+  if (db) {
+    db.collection('orders').doc(orderId).update({ assignedTo: deliveryId, dpStatus: 'assigned', status: 'Out for Delivery' }).catch(()=>{});
+  }
+  closeAssignModal();
+  showToast(`✅ Order assigned to ${deliveryId}`);
+  renderAdminDPPanel();
+}
+
+function adminAssignOrder(deliveryId) {
+  // Get all unassigned orders for assignment
+  const allOrders = JSON.parse(localStorage.getItem('scart_dp_mock_orders') || '[]');
+  const unassigned = allOrders.filter(o => !o.assignedTo && o.status !== 'Delivered');
+  if (unassigned.length === 0) { showToast('No unassigned orders available'); return; }
+  // Assign the first one
+  const order = unassigned[0];
+  assignOrderToPartner(order.orderId, deliveryId);
+}
+
+// Hook into admin panel render - extend existing renderAdminPanel
+const _origRenderAdmin = typeof renderAdminPanel !== 'undefined' ? renderAdminPanel : null;
+// We call renderAdminDPPanel when admin page opens
+const _origNav = nav;
+window.nav = function(page, cat) {
+  _origNav(page, cat);
+  if (page === 'admin') {
+    setTimeout(() => renderAdminDPPanel(), 200);
+  }
+};
+
+// Also patch saveOrderToFirebase to add to mock DP orders list
+const _origSaveOrder = saveOrderToFirebase;
+window.saveOrderToFirebase = async function(order) {
+  await _origSaveOrder(order);
+  // Add to DP mock orders
+  const all = JSON.parse(localStorage.getItem('scart_dp_mock_orders') || '[]');
+  const exists = all.find(o => o.orderId === order.orderId);
+  if (!exists) {
+    all.push({
+      ...order,
+      assignedTo: null,
+      dpStatus: null
+    });
+    localStorage.setItem('scart_dp_mock_orders', JSON.stringify(all));
+  }
+};
+
+// Init: seed demo DP account if none exist
+(function seedDemoDP() {
+  const stored = JSON.parse(localStorage.getItem('scart_dp_accounts') || '{}');
+  if (Object.keys(stored).length === 0) {
+    stored['SV001'] = {
+      deliveryId: 'SV001', name: 'Ravi Kumar', phone: '9876543210',
+      password: '123456', approved: true, available: false, status: 'offline'
+    };
+    localStorage.setItem('scart_dp_accounts', JSON.stringify(stored));
+  }
+})();
+</script>
+<!-- ── DELIVERY PARTNER LOGIN MODAL ── -->
+<div id="dp-login-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:1100;align-items:center;justify-content:center">
+  <div class="dp-login-card">
+    <div class="dp-login-header">
+      <div style="font-size:44px;margin-bottom:8px;position:relative;z-index:1">🚚</div>
+      <div style="font-family:'DM Serif Display',serif;font-size:24px;color:#fff;position:relative;z-index:1">Delivery Partner</div>
+      <div style="font-size:13px;color:rgba(255,255,255,.75);margin-top:4px;position:relative;z-index:1">Sign in to your Sri Vari rider account</div>
+    </div>
+    <div class="dp-login-body">
+      <div style="font-size:12px;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.8px;margin-bottom:16px;font-weight:700">Partner Credentials</div>
+      <input class="dp-inp" id="dp-id-input" type="text" placeholder="Delivery ID (e.g. SV001)" style="text-transform:uppercase;font-weight:700;letter-spacing:2px"/>
+      <input class="dp-inp" id="dp-pw-input" type="password" placeholder="Password" onkeydown="if(event.key==='Enter')loginDeliveryPartner()"/>
+      <div id="dp-login-error" style="display:none;background:rgba(239,68,68,.15);border:1px solid rgba(239,68,68,.3);border-radius:10px;padding:10px 14px;font-size:12px;color:#f87171;font-weight:700;margin-bottom:12px;text-align:center"></div>
+      <button class="dp-btn-main" onclick="loginDeliveryPartner()">Sign In →</button>
+      <button class="dp-btn-ghost" onclick="closeDPLogin()">← Back to Customer Login</button>
+      <div style="text-align:center;margin-top:16px;font-size:11px;color:rgba(255,255,255,.3)">Accounts are created by Sri Vari admin only</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── DELIVERY PARTNER DASHBOARD ── -->
+<div id="dp-dashboard">
+  <div class="dp-topbar">
+    <div class="dp-logo">Sri <span>Vari</span> <span style="color:rgba(255,255,255,.3);font-size:16px;font-family:'DM Sans',sans-serif;font-weight:400">Rider</span></div>
+    <div style="display:flex;align-items:center;gap:10px">
+      <div class="dp-partner-badge" id="dp-topbar-id">SV001</div>
+      <button onclick="logoutDeliveryPartner()" style="background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:8px;padding:6px 12px;color:rgba(255,255,255,.6);font-size:12px;cursor:pointer;font-family:inherit;transition:.2s" onmouseover="this.style.background='rgba(239,68,68,.15)';this.style.color='#f87171'" onmouseout="this.style.background='rgba(255,255,255,.08)';this.style.color='rgba(255,255,255,.6)'">Logout</button>
+    </div>
+  </div>
+
+  <div class="dp-content" id="dp-main-content">
+    <!-- Rendered by JS -->
+  </div>
+
+  <!-- Bottom Nav -->
+  <div class="dp-bottom-nav" id="dp-bottom-nav" style="display:flex">
+    <button class="dp-tab active" id="dp-nav-orders" onclick="dpSetTab('orders',this)">
+      <span class="dp-tab-icon">📦</span>Orders
+    </button>
+    <button class="dp-tab" id="dp-nav-earnings" onclick="dpSetTab('earnings',this)">
+      <span class="dp-tab-icon">💰</span>Earnings
+    </button>
+    <button class="dp-tab" id="dp-nav-history" onclick="dpSetTab('history',this)">
+      <span class="dp-tab-icon">📋</span>History
+    </button>
+    <button class="dp-tab" id="dp-nav-profile" onclick="dpSetTab('profile',this)">
+      <span class="dp-tab-icon">👤</span>Profile
+    </button>
+  </div>
+</div>
+
+<!-- ── ASSIGN ORDER MODAL ── -->
+<div id="assign-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:2100;align-items:center;justify-content:center">
+  <div class="assign-card">
+    <div style="font-weight:800;font-size:18px;color:var(--navy);margin-bottom:4px">Assign Delivery Partner</div>
+    <div style="font-size:13px;color:var(--muted);margin-bottom:20px" id="assign-order-label">Order #SCT001</div>
+    <div id="assign-partners-list" style="max-height:300px;overflow-y:auto;margin-bottom:16px"></div>
+    <button onclick="closeAssignModal()" class="dp-btn-ghost">Cancel</button>
+  </div>
+</div>
+
+<!-- ── ADMIN LOGIN MODAL ── -->
+<div id="admin-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:999;align-items:center;justify-content:center">
+  <div style="background:#fff;border-radius:16px;padding:28px 24px;width:320px;max-width:90vw;box-shadow:0 20px 60px rgba(0,0,0,.3)">
+    <div style="text-align:center;margin-bottom:20px">
+      <div style="font-size:40px;margin-bottom:8px">🔐</div>
+      <div style="font-weight:800;font-size:18px;color:var(--navy)">Admin Access</div>
+      <div style="font-size:13px;color:var(--muted);margin-top:4px">Enter the admin password to continue</div>
+    </div>
+    <input id="admin-pw-input" class="inp" type="password" placeholder="Password" onkeydown="if(event.key==='Enter')checkAdminLogin()"/>
+    <div id="admin-pw-error" style="display:none;color:var(--red);font-size:12px;font-weight:700;margin-bottom:8px;text-align:center">❌ Incorrect password. Try again.</div>
+    <button class="btn btn-primary" onclick="checkAdminLogin()" style="margin-bottom:8px">Unlock Admin Panel</button>
+    <button class="btn btn-default" onclick="closeAdminModal()">Cancel</button>
+  </div>
+</div>
+
+</body>
+</html>
